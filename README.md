@@ -7,7 +7,13 @@
 
 Deterministic, local-first context hygiene for flow-based automation exports. Flow Profile produces redacted, budgeted context bundles and an auditable UI that shows exactly what would be shared with an AI assistant or support engineer — without sending data off-machine.
 
-![Flow Profile web app](apps/web/docs/assets/screenshots/context-preview.png)
+![Flow Profile web app](apps/web/docs/assets/screenshots/flow-summary.png)
+
+## Why it matters
+
+- Deterministic outputs reduce review drift and make troubleshooting repeatable.
+- Redaction-first processing lowers accidental data exposure risk before sharing.
+- CLI + web parity supports both CI pipelines and human audit workflows.
 
 ## Who it's for
 
@@ -105,6 +111,12 @@ bun run dev
 ```
 
 Open http://localhost:5173 and drag-drop a `flows.json` file.
+
+## Demo GIFs
+
+![Demo: command palette and processing flow](apps/web/docs/assets/gifs/demo-command-palette.gif)
+
+![Demo: risk findings and context preview](apps/web/docs/assets/gifs/demo-risk-context.gif)
 
 ### Project scripts
 
