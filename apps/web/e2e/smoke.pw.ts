@@ -270,9 +270,7 @@ test('focus is visible on interactive elements', async ({ page }) => {
         boxShadow: styles.boxShadow,
         isActive,
         hasFocusClass,
-        hasVisibleFocus:
-          (styles.outlineWidth !== '0px' || styles.boxShadow !== 'none') &&
-          isActive,
+        hasVisibleFocus: (styles.outlineWidth !== '0px' || styles.boxShadow !== 'none') && isActive,
       };
     });
 
