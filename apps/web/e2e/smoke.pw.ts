@@ -278,7 +278,11 @@ test('focus is visible on interactive elements', async ({ page }) => {
     logStep(`Outline width: ${outlineStyle.outlineWidth}`);
     logStep(`Box shadow: ${outlineStyle.boxShadow?.slice(0, 50)}...`);
     logStep(`Has focus style class: ${outlineStyle.hasFocusClass}`);
-    logAssertion(true, outlineStyle.hasVisibleFocus || outlineStyle.hasFocusClass, 'Focus indicator visible');
+    logAssertion(
+      true,
+      outlineStyle.hasVisibleFocus || outlineStyle.hasFocusClass,
+      'Focus indicator visible',
+    );
 
     expect(outlineStyle.hasVisibleFocus || outlineStyle.hasFocusClass).toBe(true);
     logSuccess('Focus indicator is visible');
