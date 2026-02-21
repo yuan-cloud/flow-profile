@@ -9,7 +9,9 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url)),
-      '@flow-profile/core': fileURLToPath(new URL('../../packages/core/src/index.ts', import.meta.url)),
+      '@flow-profile/core': fileURLToPath(
+        new URL('../../packages/core/src/index.ts', import.meta.url),
+      ),
       '@flow-profile/ui': fileURLToPath(new URL('../../packages/ui/src/index.ts', import.meta.url)),
       '@flow-profile/ai': fileURLToPath(new URL('../../packages/ai/src/index.ts', import.meta.url)),
     },
