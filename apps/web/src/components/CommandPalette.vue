@@ -98,10 +98,10 @@ const recentCommands = ref<CommandItem[]>([]);
 const RECENT_KEY = 'fp.command.recent';
 const MAX_RECENT = 4;
 
-const commands = computed(() => (Array.isArray(props.commands) ? props.commands : []));
+const normalizedCommands = computed(() => (Array.isArray(props.commands) ? props.commands : []));
 
 const recentDisplay = computed(() => {
-  const byId = new Map(commands.value.map((command) => [command.id, command]));
+  const byId = new Map(normalizedCommands.value.map((command) => [command.id, command]));
   return recentCommands.value
     .map((command) => byId.get(command.id))
     .filter((command): command is CommandItem => Boolean(command));
@@ -113,8 +113,8 @@ const showRecent = computed(
 
 const filteredCommands = computed(() => {
   const value = query.value.trim().toLowerCase();
-  if (!value) return commands.value;
-  const scored = commands.value
+  if (!value) return normalizedCommands.value;
+  const scored = normalizedCommands.value
     .map((command) => {
       const label = command.label.toLowerCase();
       const description = command.description?.toLowerCase() ?? '';
@@ -175,7 +175,7 @@ const visibleCommands = computed(() => {
 });
 
 const handleSelect = (id: string) => {
-  const selected = commands.value.find((command) => command.id === id);
+  const selected = normalizedCommands.value.find((command) => command.id === id);
   if (selected) updateRecent(selected);
   emit('select', id);
 };
