@@ -128,7 +128,10 @@ test.describe('Performance and stress tests', () => {
 
     // Click around the UI
     const copyButton = page.locator('#controls-panel').getByTestId('copy-context-button');
-    await copyButton.click();
+    await expect(copyButton).toBeVisible({ timeout: 5_000 });
+    await expect(copyButton).toBeEnabled({ timeout: 5_000 });
+    await copyButton.scrollIntoViewIfNeeded();
+    await copyButton.click({ force: true });
 
     const exportStatus = page.locator('#controls-panel').getByTestId('export-status');
     await expect(exportStatus).toBeVisible({ timeout: 5_000 });
