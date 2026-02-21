@@ -9,4 +9,19 @@ if [ -z "$NODE_BIN" ]; then
   exit 127
 fi
 
-exec "$NODE_BIN" node_modules/@playwright/test/cli.js "$@" --config playwright.config.ts
+CLI_PATH=""
+for candidate in \
+  "node_modules/@playwright/test/cli.js" \
+  "../../node_modules/@playwright/test/cli.js"; do
+  if [ -f "$candidate" ]; then
+    CLI_PATH="$candidate"
+    break
+  fi
+done
+
+if [ -z "$CLI_PATH" ]; then
+  echo "Playwright CLI not found in apps/web or workspace root node_modules" >&2
+  exit 127
+fi
+
+exec "$NODE_BIN" "$CLI_PATH" "$@" --config playwright.config.ts
