@@ -252,8 +252,11 @@ test('focus is visible on interactive elements', async ({ page }) => {
 
     logPhase('Focus Copy Button');
     const copyButton = page.getByTestId('copy-context-button');
+    await expect(copyButton).toBeVisible({ timeout: 5_000 });
+    await expect(copyButton).toBeEnabled({ timeout: 5_000 });
     await logElementState(copyButton, 'Copy button');
     await copyButton.focus();
+    await expect(copyButton).toBeFocused();
     logSuccess('Copy button focused');
 
     logPhase('Verify Focus Indicator');
@@ -264,27 +267,19 @@ test('focus is visible on interactive elements', async ({ page }) => {
         className.includes('focus:ring') ||
         className.includes('focus:outline') ||
         className.includes('fp-focus-ring');
-      const isActive = document.activeElement === el;
       return {
         outlineWidth: styles.outlineWidth,
         boxShadow: styles.boxShadow,
-        isActive,
         hasFocusClass,
-        hasVisibleFocus: (styles.outlineWidth !== '0px' || styles.boxShadow !== 'none') && isActive,
+        hasVisibleFocus: styles.outlineWidth !== '0px' || styles.boxShadow !== 'none',
       };
     });
 
     logStep(`Outline width: ${outlineStyle.outlineWidth}`);
     logStep(`Box shadow: ${outlineStyle.boxShadow?.slice(0, 50)}...`);
-    logStep(`Is active element: ${outlineStyle.isActive}`);
     logStep(`Has focus style class: ${outlineStyle.hasFocusClass}`);
-    logAssertion(
-      true,
-      outlineStyle.hasVisibleFocus || (outlineStyle.isActive && outlineStyle.hasFocusClass),
-      'Focus indicator visible',
-    );
+    logAssertion(true, outlineStyle.hasVisibleFocus || outlineStyle.hasFocusClass, 'Focus indicator visible');
 
-    expect(outlineStyle.isActive).toBe(true);
     expect(outlineStyle.hasVisibleFocus || outlineStyle.hasFocusClass).toBe(true);
     logSuccess('Focus indicator is visible');
   } catch (error) {

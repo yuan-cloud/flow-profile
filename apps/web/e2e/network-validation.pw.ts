@@ -86,6 +86,9 @@ test.describe('Network request validation', () => {
 
     // Scope to #controls-panel to avoid duplicate testid
     const copyButton = page.locator('#controls-panel').getByTestId('copy-context-button');
+    await expect(copyButton).toBeVisible({ timeout: 5_000 });
+    await expect(copyButton).toBeEnabled({ timeout: 5_000 });
+    await copyButton.scrollIntoViewIfNeeded();
     await copyButton.click();
 
     const exportStatus = page.locator('#controls-panel').getByTestId('export-status');
