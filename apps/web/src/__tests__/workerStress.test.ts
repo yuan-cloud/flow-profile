@@ -1,9 +1,8 @@
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 
-import { describe, expect, it } from 'vitest';
-
 import { categorizeFlow, expandSubflows, parseFlow } from '@flow-profile/core';
+import { describe, expect, it } from 'vitest';
 
 import { parseJsonSafe } from '@/utils/errorHandling';
 import { buildResultFromInput, buildResultFromParts } from '@/workers/buildResult';
