@@ -3,6 +3,8 @@ import { resolve } from 'node:path';
 
 import { describe, expect, it } from 'vitest';
 
+import { categorizeFlow, expandSubflows, parseFlow } from '@flow-profile/core';
+
 import { parseJsonSafe } from '@/utils/errorHandling';
 import { buildResultFromInput, buildResultFromParts } from '@/workers/buildResult';
 
@@ -159,7 +161,6 @@ describe('Worker stress and recovery', () => {
 
   describe('buildResultFromParts edge cases', () => {
     it('handles parsed flow with no edges', () => {
-      const { categorizeFlow, expandSubflows, parseFlow } = require('@flow-profile/core');
       const input = [
         { id: 'tab1', type: 'tab', label: 'No Edges' },
         { id: 'n1', type: 'inject', z: 'tab1', x: 0, y: 0, wires: [] },
