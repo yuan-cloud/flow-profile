@@ -1,0 +1,457 @@
+/**
+ * Design System: Color Token System
+ *
+ * Semantic color tokens for the Flow Profile application.
+ * All colors are defined as CSS custom properties for flexibility.
+ *
+ * Token naming convention:
+ *   --fp-{category}-{variant}
+ *
+ * Categories:
+ *   - surface: background colors
+ *   - border: border colors
+ *   - text: text colors
+ *   - accent: brand/action colors
+ *   - feedback: success/warning/error/info
+ *
+ * All colors tested for WCAG AA contrast against their intended backgrounds.
+ */
+
+:root {
+  /* =========================================================================
+   * SURFACE TOKENS - Background colors
+   * ========================================================================= */
+
+  /* Base application background - darkest */
+  --fp-surface-base: #0f172a; /* slate-900 */
+
+  /* Elevated surfaces (cards, modals, dropdowns) */
+  --fp-surface-elevated: #1e293b; /* slate-800 */
+
+  /* Sunken/inset surfaces (input backgrounds, code blocks) */
+  --fp-surface-sunken: #0b1120;
+
+  /* Hover state for surfaces */
+  --fp-surface-hover: #334155; /* slate-700 */
+
+  /* Active/pressed state for surfaces */
+  --fp-surface-active: #475569; /* slate-600 */
+
+  /* Overlay for modals/dialogs (semi-transparent) */
+  --fp-surface-overlay: rgba(0, 0, 0, var(--fp-opacity-prominent));
+
+  /* =========================================================================
+   * OPACITY TOKENS - Consistent alpha scale for borders and backgrounds
+   * ========================================================================= */
+
+  --fp-opacity-subtle: 0.2;
+  --fp-opacity-default: 0.35;
+  --fp-opacity-medium: 0.5;
+  --fp-opacity-prominent: 0.7;
+
+  /* =========================================================================
+   * BORDER TOKENS - Border and divider colors
+   * ========================================================================= */
+
+  /* Default border color */
+  --fp-border-default: #334155; /* slate-700 */
+
+  /* Subtle border (less prominent) */
+  --fp-border-subtle: #1e293b; /* slate-800 */
+
+  /* Strong border (more prominent) */
+  --fp-border-strong: #475569; /* slate-600 */
+
+  /* Focus ring color */
+  --fp-border-focus: #38bdf8; /* sky-400 */
+
+  /* =========================================================================
+   * TEXT TOKENS - Text colors
+   * WCAG AA: 4.5:1 for normal text, 3:1 for large text
+   * ========================================================================= */
+
+  /* Primary text - highest contrast (7:1+ on slate-900) */
+  --fp-text-primary: #f8fafc; /* slate-50 */
+
+  /* Secondary text - medium contrast (5.5:1 on slate-900) */
+  --fp-text-secondary: #cbd5e1; /* slate-300 */
+
+  /* Muted text - lowest contrast for less important info (4.5:1 on slate-900) */
+  --fp-text-muted: #94a3b8; /* slate-400 */
+
+  /* Disabled text */
+  --fp-text-disabled: #64748b; /* slate-500 */
+
+  /* Inverse text (for light backgrounds) */
+  --fp-text-inverse: #0f172a; /* slate-900 */
+
+  /* =========================================================================
+   * ACCENT TOKENS - Brand and action colors
+   * Used for primary actions, links, and brand elements
+   * ========================================================================= */
+
+  /* Primary accent - main brand color */
+  --fp-accent-primary: #10b981; /* emerald-500 */
+  --fp-accent-primary-hover: #34d399; /* emerald-400 */
+  --fp-accent-primary-active: #059669; /* emerald-600 */
+
+  /* Secondary accent - for secondary actions */
+  --fp-accent-secondary: #38bdf8; /* sky-400 */
+  --fp-accent-secondary-hover: #7dd3fc; /* sky-300 */
+  --fp-accent-secondary-active: #0ea5e9; /* sky-500 */
+
+  /* Accent text colors (on dark backgrounds) */
+  --fp-accent-text: #6ee7b7; /* emerald-300 - AA on slate-900 */
+  --fp-accent-text-hover: #a7f3d0; /* emerald-200 */
+
+  /* Accent backgrounds (subtle) */
+  --fp-accent-subtle: rgba(16, 185, 129, var(--fp-opacity-subtle));
+  --fp-accent-subtle-hover: rgba(16, 185, 129, var(--fp-opacity-default));
+
+  /* =========================================================================
+   * FEEDBACK TOKENS - Status and feedback colors
+   * ========================================================================= */
+
+  /* Success - positive outcomes, confirmations */
+  --fp-feedback-success: #22c55e; /* green-500 */
+  --fp-feedback-success-text: #86efac; /* green-300 - AA on slate-900 */
+  --fp-feedback-success-bg: rgba(34, 197, 94, var(--fp-opacity-subtle));
+  --fp-feedback-success-border: rgba(34, 197, 94, var(--fp-opacity-default));
+
+  /* Warning - cautions, non-critical issues */
+  --fp-feedback-warning: #f59e0b; /* amber-500 */
+  --fp-feedback-warning-text: #fcd34d; /* amber-300 - AA on slate-900 */
+  --fp-feedback-warning-bg: rgba(245, 158, 11, var(--fp-opacity-subtle));
+  --fp-feedback-warning-border: rgba(245, 158, 11, var(--fp-opacity-default));
+
+  /* Error - problems, failures, destructive actions */
+  --fp-feedback-error: #ef4444; /* red-500 */
+  --fp-feedback-error-text: #fca5a5; /* red-300 - AA on slate-900 */
+  --fp-feedback-error-bg: rgba(239, 68, 68, var(--fp-opacity-subtle));
+  --fp-feedback-error-border: rgba(239, 68, 68, var(--fp-opacity-default));
+
+  /* Info - neutral information, tips */
+  --fp-feedback-info: #3b82f6; /* blue-500 */
+  --fp-feedback-info-text: #93c5fd; /* blue-300 - AA on slate-900 */
+  --fp-feedback-info-bg: rgba(59, 130, 246, var(--fp-opacity-subtle));
+  --fp-feedback-info-border: rgba(59, 130, 246, var(--fp-opacity-default));
+
+  /* =========================================================================
+   * SEVERITY TOKENS - For risk findings display
+   * ========================================================================= */
+
+  --fp-severity-high: #ef4444; /* red-500 */
+  --fp-severity-high-text: #fca5a5; /* red-300 */
+  --fp-severity-high-bg: rgba(239, 68, 68, var(--fp-opacity-subtle));
+
+  --fp-severity-medium: #f59e0b; /* amber-500 */
+  --fp-severity-medium-text: #fcd34d; /* amber-300 */
+  --fp-severity-medium-bg: rgba(245, 158, 11, var(--fp-opacity-subtle));
+
+  --fp-severity-low: #3b82f6; /* blue-500 */
+  --fp-severity-low-text: #93c5fd; /* blue-300 */
+  --fp-severity-low-bg: rgba(59, 130, 246, var(--fp-opacity-subtle));
+
+  /* =========================================================================
+   * SPECIAL PURPOSE TOKENS
+   * ========================================================================= */
+
+  /* Code/syntax highlighting background */
+  --fp-code-bg: #0d1117;
+
+  /* Selection highlight */
+  --fp-selection-bg: rgba(56, 189, 248, var(--fp-opacity-default));
+
+  /* Scrollbar colors */
+  --fp-scrollbar-track: var(--fp-surface-sunken);
+  --fp-scrollbar-thumb: var(--fp-border-default);
+  --fp-scrollbar-thumb-hover: var(--fp-border-strong);
+
+  /* =========================================================================
+   * TYPOGRAPHY TOKENS - Type scale and system
+   *
+   * Based on a 1.25 ratio (Major Third) scale from 16px base.
+   * Sizes: 12, 14, 16, 20, 24, 30, 36, 48, 60
+   * ========================================================================= */
+
+  /* Font families */
+  --fp-font-sans: 'Space Grotesk', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --fp-font-mono: 'JetBrains Mono', 'Fira Code', 'SF Mono', Consolas, monospace;
+
+  /* Font sizes - using rem for accessibility (scales with user preferences) */
+  --fp-text-xs: 0.75rem;      /* 12px */
+  --fp-text-sm: 0.875rem;     /* 14px */
+  --fp-text-base: 1rem;       /* 16px */
+  --fp-text-lg: 1.25rem;      /* 20px */
+  --fp-text-xl: 1.5rem;       /* 24px */
+  --fp-text-2xl: 1.875rem;    /* 30px */
+  --fp-text-3xl: 2.25rem;     /* 36px */
+  --fp-text-4xl: 3rem;        /* 48px */
+  --fp-text-5xl: 3.75rem;     /* 60px */
+
+  /* Font weights */
+  --fp-font-normal: 400;
+  --fp-font-medium: 500;
+  --fp-font-semibold: 600;
+  --fp-font-bold: 700;
+
+  /* Line heights - optimized for readability */
+  --fp-leading-none: 1;
+  --fp-leading-tight: 1.25;
+  --fp-leading-snug: 1.375;
+  --fp-leading-normal: 1.5;
+  --fp-leading-relaxed: 1.625;
+  --fp-leading-loose: 2;
+
+  /* Letter spacing */
+  --fp-tracking-tighter: -0.05em;
+  --fp-tracking-tight: -0.025em;
+  --fp-tracking-normal: 0;
+  --fp-tracking-wide: 0.025em;
+  --fp-tracking-wider: 0.05em;
+  --fp-tracking-widest: 0.1em;
+  --fp-tracking-caps: 0.3em;  /* For uppercase labels */
+
+  /* =========================================================================
+   * COMPOSITE TYPOGRAPHY TOKENS - Pre-composed text styles
+   * ========================================================================= */
+
+  /* Display - Hero text, large callouts */
+  --fp-type-display-size: var(--fp-text-4xl);
+  --fp-type-display-weight: var(--fp-font-bold);
+  --fp-type-display-leading: var(--fp-leading-tight);
+  --fp-type-display-tracking: var(--fp-tracking-tight);
+
+  /* Heading 1 */
+  --fp-type-h1-size: var(--fp-text-3xl);
+  --fp-type-h1-weight: var(--fp-font-bold);
+  --fp-type-h1-leading: var(--fp-leading-tight);
+  --fp-type-h1-tracking: var(--fp-tracking-tight);
+
+  /* Heading 2 */
+  --fp-type-h2-size: var(--fp-text-2xl);
+  --fp-type-h2-weight: var(--fp-font-semibold);
+  --fp-type-h2-leading: var(--fp-leading-snug);
+  --fp-type-h2-tracking: var(--fp-tracking-normal);
+
+  /* Heading 3 */
+  --fp-type-h3-size: var(--fp-text-xl);
+  --fp-type-h3-weight: var(--fp-font-semibold);
+  --fp-type-h3-leading: var(--fp-leading-snug);
+  --fp-type-h3-tracking: var(--fp-tracking-normal);
+
+  /* Heading 4 */
+  --fp-type-h4-size: var(--fp-text-lg);
+  --fp-type-h4-weight: var(--fp-font-medium);
+  --fp-type-h4-leading: var(--fp-leading-snug);
+  --fp-type-h4-tracking: var(--fp-tracking-normal);
+
+  /* Body - Default paragraph text */
+  --fp-type-body-size: var(--fp-text-base);
+  --fp-type-body-weight: var(--fp-font-normal);
+  --fp-type-body-leading: var(--fp-leading-normal);
+  --fp-type-body-tracking: var(--fp-tracking-normal);
+
+  /* Body small */
+  --fp-type-body-sm-size: var(--fp-text-sm);
+  --fp-type-body-sm-weight: var(--fp-font-normal);
+  --fp-type-body-sm-leading: var(--fp-leading-normal);
+  --fp-type-body-sm-tracking: var(--fp-tracking-normal);
+
+  /* Caption - Small labels, metadata */
+  --fp-type-caption-size: var(--fp-text-xs);
+  --fp-type-caption-weight: var(--fp-font-normal);
+  --fp-type-caption-leading: var(--fp-leading-normal);
+  --fp-type-caption-tracking: var(--fp-tracking-wide);
+
+  /* Overline - Section labels, category tags */
+  --fp-type-overline-size: var(--fp-text-xs);
+  --fp-type-overline-weight: var(--fp-font-medium);
+  --fp-type-overline-leading: var(--fp-leading-normal);
+  --fp-type-overline-tracking: var(--fp-tracking-caps);
+
+  /* Code - Monospace text */
+  --fp-type-code-size: 0.9em;  /* Slightly smaller than surrounding text */
+  --fp-type-code-weight: var(--fp-font-normal);
+  --fp-type-code-leading: var(--fp-leading-relaxed);
+  --fp-type-code-tracking: var(--fp-tracking-normal);
+
+  /* =========================================================================
+   * SPACING TOKENS - Consistent spacing scale
+   *
+   * Based on a 4px base unit (0.25rem) with a harmonious scale.
+   * Use these for margins, paddings, gaps, and positioning.
+   * ========================================================================= */
+
+  /* Base spacing unit */
+  --fp-space-unit: 0.25rem; /* 4px */
+
+  /* Spacing scale */
+  --fp-space-0: 0;
+  --fp-space-px: 1px;
+  --fp-space-0-5: 0.125rem;   /* 2px */
+  --fp-space-1: 0.25rem;      /* 4px */
+  --fp-space-1-5: 0.375rem;   /* 6px */
+  --fp-space-2: 0.5rem;       /* 8px */
+  --fp-space-2-5: 0.625rem;   /* 10px */
+  --fp-space-3: 0.75rem;      /* 12px */
+  --fp-space-3-5: 0.875rem;   /* 14px */
+  --fp-space-4: 1rem;         /* 16px */
+  --fp-space-5: 1.25rem;      /* 20px */
+  --fp-space-6: 1.5rem;       /* 24px */
+  --fp-space-7: 1.75rem;      /* 28px */
+  --fp-space-8: 2rem;         /* 32px */
+  --fp-space-9: 2.25rem;      /* 36px */
+  --fp-space-10: 2.5rem;      /* 40px */
+  --fp-space-11: 2.75rem;     /* 44px */
+  --fp-space-12: 3rem;        /* 48px */
+  --fp-space-14: 3.5rem;      /* 56px */
+  --fp-space-16: 4rem;        /* 64px */
+  --fp-space-20: 5rem;        /* 80px */
+  --fp-space-24: 6rem;        /* 96px */
+  --fp-space-28: 7rem;        /* 112px */
+  --fp-space-32: 8rem;        /* 128px */
+
+  /* =========================================================================
+   * SEMANTIC SPACING - Named spacing for common use cases
+   * ========================================================================= */
+
+  /* Component internal spacing */
+  --fp-space-inset-xs: var(--fp-space-1);     /* 4px - tight internal padding */
+  --fp-space-inset-sm: var(--fp-space-2);     /* 8px - compact internal padding */
+  --fp-space-inset-md: var(--fp-space-4);     /* 16px - default internal padding */
+  --fp-space-inset-lg: var(--fp-space-6);     /* 24px - spacious internal padding */
+  --fp-space-inset-xl: var(--fp-space-8);     /* 32px - very spacious padding */
+
+  /* Stack spacing (vertical rhythm between elements) */
+  --fp-space-stack-xs: var(--fp-space-1);     /* 4px - minimal gap */
+  --fp-space-stack-sm: var(--fp-space-2);     /* 8px - tight gap */
+  --fp-space-stack-md: var(--fp-space-4);     /* 16px - default gap */
+  --fp-space-stack-lg: var(--fp-space-6);     /* 24px - section gap */
+  --fp-space-stack-xl: var(--fp-space-8);     /* 32px - major section gap */
+
+  /* Inline spacing (horizontal spacing between elements) */
+  --fp-space-inline-xs: var(--fp-space-1);    /* 4px */
+  --fp-space-inline-sm: var(--fp-space-2);    /* 8px */
+  --fp-space-inline-md: var(--fp-space-3);    /* 12px */
+  --fp-space-inline-lg: var(--fp-space-4);    /* 16px */
+  --fp-space-inline-xl: var(--fp-space-6);    /* 24px */
+
+  /* =========================================================================
+   * LAYOUT TOKENS - Container widths and breakpoints
+   * ========================================================================= */
+
+  /* Container max widths */
+  --fp-container-xs: 20rem;    /* 320px */
+  --fp-container-sm: 24rem;    /* 384px */
+  --fp-container-md: 28rem;    /* 448px */
+  --fp-container-lg: 32rem;    /* 512px */
+  --fp-container-xl: 36rem;    /* 576px */
+  --fp-container-2xl: 42rem;   /* 672px */
+  --fp-container-3xl: 48rem;   /* 768px */
+  --fp-container-4xl: 56rem;   /* 896px */
+  --fp-container-5xl: 64rem;   /* 1024px */
+  --fp-container-6xl: 72rem;   /* 1152px */
+  --fp-container-7xl: 80rem;   /* 1280px */
+  --fp-container-full: 100%;
+
+  /* Content widths for readability */
+  --fp-content-prose: 65ch;    /* Optimal line length for reading */
+  --fp-content-narrow: 45ch;   /* Short-form content */
+  --fp-content-wide: 80ch;     /* Code or wide content */
+
+  /* =========================================================================
+   * BORDER RADIUS TOKENS
+   * ========================================================================= */
+
+  --fp-radius-none: 0;
+  --fp-radius-sm: 0.125rem;    /* 2px */
+  --fp-radius-md: 0.25rem;     /* 4px */
+  --fp-radius-lg: 0.5rem;      /* 8px */
+  --fp-radius-xl: 0.75rem;     /* 12px */
+  --fp-radius-2xl: 1rem;       /* 16px */
+  --fp-radius-3xl: 1.5rem;     /* 24px */
+  --fp-radius-full: 9999px;    /* Pill shape */
+
+  /* =========================================================================
+   * Z-INDEX SCALE - Layering system
+   * ========================================================================= */
+
+  --fp-z-base: 0;
+  --fp-z-dropdown: 100;
+  --fp-z-sticky: 200;
+  --fp-z-fixed: 300;
+  --fp-z-modal-backdrop: 400;
+  --fp-z-modal: 500;
+  --fp-z-popover: 600;
+  --fp-z-tooltip: 700;
+  --fp-z-toast: 800;
+  --fp-z-max: 9999;
+
+  /* =========================================================================
+   * MOTION TOKENS - Animation and transition system
+   *
+   * Consistent timing and easing for smooth, professional animations.
+   * Respects user's reduced-motion preferences via media query.
+   * ========================================================================= */
+
+  /* Duration scale */
+  --fp-duration-instant: 0ms;
+  --fp-duration-fast: 100ms;       /* Micro-interactions (hover, focus) */
+  --fp-duration-normal: 200ms;     /* Standard transitions */
+  --fp-duration-slow: 300ms;       /* Larger element transitions */
+  --fp-duration-slower: 500ms;     /* Page transitions, modals */
+  --fp-duration-slowest: 700ms;    /* Complex sequences */
+
+  /* Easing functions */
+  --fp-ease-linear: linear;
+  --fp-ease-in: cubic-bezier(0.4, 0, 1, 1);
+  --fp-ease-out: cubic-bezier(0, 0, 0.2, 1);
+  --fp-ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* Spring-like easings for more natural feel */
+  --fp-ease-spring: cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  --fp-ease-bounce: cubic-bezier(0.68, -0.55, 0.265, 1.55);
+
+  /* Semantic motion tokens */
+  --fp-motion-hover: var(--fp-duration-fast) var(--fp-ease-out);
+  --fp-motion-focus: var(--fp-duration-fast) var(--fp-ease-out);
+  --fp-motion-active: var(--fp-duration-instant);
+  --fp-motion-enter: var(--fp-duration-normal) var(--fp-ease-out);
+  --fp-motion-exit: var(--fp-duration-fast) var(--fp-ease-in);
+  --fp-motion-move: var(--fp-duration-slow) var(--fp-ease-in-out);
+  --fp-motion-expand: var(--fp-duration-normal) var(--fp-ease-spring);
+  --fp-motion-collapse: var(--fp-duration-fast) var(--fp-ease-in);
+
+  /* Common transition properties */
+  --fp-transition-colors: color, background-color, border-color, text-decoration-color, fill, stroke;
+  --fp-transition-opacity: opacity;
+  --fp-transition-shadow: box-shadow;
+  --fp-transition-transform: transform;
+  --fp-transition-all: all;
+}
+
+/* Reduced motion: respect user preferences */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --fp-duration-instant: 0ms;
+    --fp-duration-fast: 0ms;
+    --fp-duration-normal: 0ms;
+    --fp-duration-slow: 0ms;
+    --fp-duration-slower: 0ms;
+    --fp-duration-slowest: 0ms;
+  }
+}
+
+/* =========================================================================
+ * LIGHT MODE OVERRIDES (if needed in future)
+ * Currently the app is dark-mode only, but tokens are structured
+ * to easily support light mode by overriding these values.
+ * ========================================================================= */
+/*
+.light {
+  --fp-surface-base: #ffffff;
+  --fp-surface-elevated: #f8fafc;
+  ...
+}
+*/

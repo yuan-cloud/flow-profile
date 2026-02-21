@@ -1,0 +1,12 @@
+flow-lint:
+  stage: test
+  image: oven/bun:latest
+  script:
+    - bun install -g @flow-profile/cli
+    - flow-profile lint ./flows --format json --output flow-profile-report.json
+  artifacts:
+    paths:
+      - flow-profile-report.json
+  rules:
+    - changes:
+        - flows/**/*.json

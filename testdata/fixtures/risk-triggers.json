@@ -1,0 +1,85 @@
+[
+  {
+    "id": "tab-risk",
+    "type": "tab",
+    "label": "Risk Triggers"
+  },
+  {
+    "id": "comment-risk",
+    "type": "comment",
+    "z": "tab-risk",
+    "name": "Fixture: risk-triggers.json - no catch, injection, loops",
+    "x": 170,
+    "y": 40
+  },
+  {
+    "id": "http-in",
+    "type": "http in",
+    "z": "tab-risk",
+    "name": "Incoming request",
+    "url": "/api/test",
+    "method": "post",
+    "x": 120,
+    "y": 140,
+    "wires": [["template-node"]]
+  },
+  {
+    "id": "template-node",
+    "type": "template",
+    "z": "tab-risk",
+    "name": "Render template",
+    "template": "Hello {{payload}}",
+    "x": 320,
+    "y": 140,
+    "wires": [["http-response"]]
+  },
+  {
+    "id": "http-response",
+    "type": "http response",
+    "z": "tab-risk",
+    "name": "Send response",
+    "x": 520,
+    "y": 140,
+    "wires": []
+  },
+  {
+    "id": "exec-node",
+    "type": "exec",
+    "z": "tab-risk",
+    "name": "Run command",
+    "command": "ls -la",
+    "x": 320,
+    "y": 220,
+    "wires": []
+  },
+  {
+    "id": "self-loop",
+    "type": "function",
+    "z": "tab-risk",
+    "name": "Self loop",
+    "func": "return msg;",
+    "x": 120,
+    "y": 300,
+    "wires": [["self-loop"]]
+  },
+  {
+    "id": "cycle-a",
+    "type": "function",
+    "z": "tab-risk",
+    "name": "Cycle A",
+    "func": "return msg;",
+    "x": 320,
+    "y": 300,
+    "wires": [["cycle-b"]]
+  },
+  {
+    "id": "cycle-b",
+    "type": "function",
+    "z": "tab-risk",
+    "name": "Cycle B",
+    "func": "return msg;",
+    "x": 520,
+    "y": 300,
+    "wires": [["cycle-a"]]
+  }
+]

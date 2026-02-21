@@ -1,0 +1,42 @@
+[
+  {
+    "id": "tab1",
+    "type": "tab",
+    "label": "Flow 1",
+    "disabled": false
+  },
+  {
+    "id": "node1",
+    "type": "inject",
+    "z": "tab1",
+    "name": "inject test",
+    "x": 100,
+    "y": 200,
+    "wires": [["node2"]],
+    "topic": "",
+    "payload": "hello",
+    "payloadType": "str",
+    "repeat": "",
+    "crontab": "",
+    "once": false
+  },
+  {
+    "id": "node2",
+    "type": "debug",
+    "z": "tab1",
+    "name": "debug output",
+    "x": 300,
+    "y": 200,
+    "wires": [],
+    "active": true,
+    "tosidebar": true,
+    "console": false
+  },
+  {
+    "id": "config1",
+    "type": "mqtt-broker",
+    "name": "Local MQTT",
+    "broker": "localhost",
+    "port": "1883"
+  }
+]

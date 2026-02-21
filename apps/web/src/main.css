@@ -1,0 +1,240 @@
+/* Design System Tokens - must be imported before Tailwind */
+@import './styles/tokens.css';
+@import './styles/accessibility.css';
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: dark;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: 'Space Grotesk', system-ui, -apple-system, sans-serif;
+  background-color: var(--fp-surface-base);
+  color: var(--fp-text-primary);
+}
+
+/* Custom scrollbar using design tokens */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--fp-scrollbar-track);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--fp-scrollbar-thumb);
+  border-radius: var(--fp-radius-md);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--fp-scrollbar-thumb-hover);
+}
+
+/* Selection highlight using design tokens */
+::selection {
+  background: var(--fp-selection-bg);
+}
+
+/* Scroll containers */
+.fp-scroll-area {
+  scroll-behavior: smooth;
+  scrollbar-width: thin;
+  scrollbar-color: var(--fp-scrollbar-thumb) var(--fp-scrollbar-track);
+  scrollbar-gutter: stable;
+  background:
+    linear-gradient(var(--fp-surface-base), transparent) top,
+    linear-gradient(transparent, var(--fp-surface-base)) bottom,
+    radial-gradient(farthest-side at 50% 0, rgba(15, 23, 42, 0.65), rgba(15, 23, 42, 0)) top,
+    radial-gradient(farthest-side at 50% 100%, rgba(15, 23, 42, 0.65), rgba(15, 23, 42, 0)) bottom;
+  background-repeat: no-repeat;
+  background-size: 100% 24px, 100% 24px, 100% 12px, 100% 12px;
+  background-attachment: local, local, scroll, scroll;
+}
+
+.fp-scroll-area::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.fp-scroll-area::-webkit-scrollbar-track {
+  background: var(--fp-scrollbar-track);
+}
+
+.fp-scroll-area::-webkit-scrollbar-thumb {
+  background: var(--fp-scrollbar-thumb);
+  border-radius: var(--fp-radius-md);
+}
+
+.fp-scroll-area::-webkit-scrollbar-thumb:hover {
+  background: var(--fp-scrollbar-thumb-hover);
+}
+
+/* =========================================================================
+ * Typography Utility Classes
+ *
+ * Pre-composed text styles for consistent typography.
+ * Use these for semantic text styling instead of composing individual utilities.
+ * ========================================================================= */
+
+@layer components {
+  .fp-touch-target {
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  .fp-focus-ring:focus,
+  .fp-focus-ring:focus-visible {
+    outline: 2px solid var(--fp-border-focus);
+    outline-offset: 2px;
+    box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.35);
+  }
+
+  /* Entrance motion helpers */
+  .fp-entrance {
+    animation: fp-slide-in-up var(--fp-duration-normal) var(--fp-ease-spring) both;
+    will-change: transform, opacity;
+  }
+
+  .fp-entrance-fade {
+    animation: fp-fade-in var(--fp-duration-normal) var(--fp-ease-out) both;
+  }
+
+  .fp-entrance-stagger > * {
+    animation: fp-slide-in-up var(--fp-duration-normal) var(--fp-ease-spring) both;
+    will-change: transform, opacity;
+  }
+
+  .fp-entrance-stagger > *:nth-child(1) { animation-delay: 0ms; }
+  .fp-entrance-stagger > *:nth-child(2) { animation-delay: 40ms; }
+  .fp-entrance-stagger > *:nth-child(3) { animation-delay: 80ms; }
+  .fp-entrance-stagger > *:nth-child(4) { animation-delay: 120ms; }
+  .fp-entrance-stagger > *:nth-child(5) { animation-delay: 160ms; }
+  .fp-entrance-stagger > *:nth-child(6) { animation-delay: 200ms; }
+
+  /* Display - Hero text, large callouts */
+  .fp-type-display {
+    font-size: var(--fp-type-display-size);
+    font-weight: var(--fp-type-display-weight);
+    line-height: var(--fp-type-display-leading);
+    letter-spacing: var(--fp-type-display-tracking);
+  }
+
+  /* Heading styles */
+  .fp-type-h1 {
+    font-size: var(--fp-type-h1-size);
+    font-weight: var(--fp-type-h1-weight);
+    line-height: var(--fp-type-h1-leading);
+    letter-spacing: var(--fp-type-h1-tracking);
+  }
+
+  .fp-type-h2 {
+    font-size: var(--fp-type-h2-size);
+    font-weight: var(--fp-type-h2-weight);
+    line-height: var(--fp-type-h2-leading);
+    letter-spacing: var(--fp-type-h2-tracking);
+  }
+
+  .fp-type-h3 {
+    font-size: var(--fp-type-h3-size);
+    font-weight: var(--fp-type-h3-weight);
+    line-height: var(--fp-type-h3-leading);
+    letter-spacing: var(--fp-type-h3-tracking);
+  }
+
+  .fp-type-h4 {
+    font-size: var(--fp-type-h4-size);
+    font-weight: var(--fp-type-h4-weight);
+    line-height: var(--fp-type-h4-leading);
+    letter-spacing: var(--fp-type-h4-tracking);
+  }
+
+  /* Body text styles */
+  .fp-type-body {
+    font-size: var(--fp-type-body-size);
+    font-weight: var(--fp-type-body-weight);
+    line-height: var(--fp-type-body-leading);
+    letter-spacing: var(--fp-type-body-tracking);
+  }
+
+  .fp-type-body-sm {
+    font-size: var(--fp-type-body-sm-size);
+    font-weight: var(--fp-type-body-sm-weight);
+    line-height: var(--fp-type-body-sm-leading);
+    letter-spacing: var(--fp-type-body-sm-tracking);
+  }
+
+  /* Caption - Small labels, metadata */
+  .fp-type-caption {
+    font-size: var(--fp-type-caption-size);
+    font-weight: var(--fp-type-caption-weight);
+    line-height: var(--fp-type-caption-leading);
+    letter-spacing: var(--fp-type-caption-tracking);
+  }
+
+  /* Overline - Section labels, uppercase tags */
+  .fp-type-overline {
+    font-size: var(--fp-type-overline-size);
+    font-weight: var(--fp-type-overline-weight);
+    line-height: var(--fp-type-overline-leading);
+    letter-spacing: var(--fp-type-overline-tracking);
+    text-transform: uppercase;
+  }
+
+  /* Code - Monospace text */
+  .fp-type-code {
+    font-family: var(--fp-font-mono);
+    font-size: var(--fp-type-code-size);
+    font-weight: var(--fp-type-code-weight);
+    line-height: var(--fp-type-code-leading);
+    letter-spacing: var(--fp-type-code-tracking);
+  }
+
+  /* Context menu - shared floating menu used by panels */
+  .fp-context-menu__backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: var(--fp-z-modal-backdrop);
+  }
+
+  .fp-context-menu {
+    position: fixed;
+    z-index: var(--fp-z-popover);
+    min-width: 180px;
+    background: rgba(15, 23, 42, 0.98);
+    border: 1px solid rgba(148, 163, 184, 0.3);
+    border-radius: var(--fp-radius-2xl);
+    padding: var(--fp-space-2);
+    display: grid;
+    gap: var(--fp-space-1);
+    box-shadow: 0 16px 30px rgba(2, 6, 23, 0.45);
+  }
+
+  .fp-context-menu__item {
+    background: transparent;
+    border: none;
+    color: inherit;
+    text-align: left;
+    padding: var(--fp-space-1-5) var(--fp-space-2-5);
+    border-radius: var(--fp-radius-xl);
+    font-size: 12px;
+    cursor: pointer;
+  }
+
+  .fp-context-menu__item:hover:not(:disabled) {
+    background: rgba(148, 163, 184, 0.16);
+  }
+
+  .fp-context-menu__item:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}

@@ -1,0 +1,26 @@
+name: Flow Profile Lint
+
+on:
+  pull_request:
+    paths:
+      - 'flows/**/*.json'
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: oven-sh/setup-bun@v1
+
+      - name: Install Flow Profile CLI
+        run: bun install -g @flow-profile/cli
+
+      - name: Lint flows (SARIF)
+        run: flow-profile lint ./flows --format sarif --output results.sarif
+
+      - name: Upload SARIF
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: results.sarif

@@ -1,0 +1,59 @@
+[
+  {
+    "id": "tab-demo-simple",
+    "type": "tab",
+    "label": "Demo Simple",
+    "disabled": false
+  },
+  {
+    "id": "inject-simple",
+    "type": "inject",
+    "z": "tab-demo-simple",
+    "name": "Start",
+    "x": 120,
+    "y": 120,
+    "wires": [["func-simple"]]
+  },
+  {
+    "id": "func-simple",
+    "type": "function",
+    "z": "tab-demo-simple",
+    "name": "Add Greeting",
+    "x": 300,
+    "y": 120,
+    "wires": [["change-simple"]],
+    "func": "msg.payload = `hello ${msg.payload}`; return msg;",
+    "apiKey": "sk-demo-1234567890"
+  },
+  {
+    "id": "change-simple",
+    "type": "change",
+    "z": "tab-demo-simple",
+    "name": "Set Topic",
+    "x": 480,
+    "y": 120,
+    "wires": [["http-simple"]],
+    "rules": [{ "t": "set", "p": "topic", "pt": "msg", "to": "demo/simple", "tot": "str" }]
+  },
+  {
+    "id": "http-simple",
+    "type": "http request",
+    "z": "tab-demo-simple",
+    "name": "Call Demo API",
+    "x": 660,
+    "y": 120,
+    "wires": [["debug-simple"]],
+    "method": "GET",
+    "ret": "txt",
+    "url": "https://api.example.com/hello"
+  },
+  {
+    "id": "debug-simple",
+    "type": "debug",
+    "z": "tab-demo-simple",
+    "name": "Result",
+    "x": 840,
+    "y": 120,
+    "wires": []
+  }
+]

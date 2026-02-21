@@ -1,0 +1,95 @@
+[
+  {
+    "id": "tab-cap",
+    "type": "tab",
+    "label": "Capability Surface"
+  },
+  {
+    "id": "comment-cap",
+    "type": "comment",
+    "z": "tab-cap",
+    "name": "Fixture: capability-surface.json - tools vs resources",
+    "x": 170,
+    "y": 40
+  },
+  {
+    "id": "http-in-cap",
+    "type": "http in",
+    "z": "tab-cap",
+    "name": "HTTP endpoint",
+    "url": "/api/cap",
+    "method": "get",
+    "x": 120,
+    "y": 120,
+    "wires": [["function-cap"]]
+  },
+  {
+    "id": "function-cap",
+    "type": "function",
+    "z": "tab-cap",
+    "name": "Process",
+    "func": "msg.payload = { ok: true }; return msg;",
+    "x": 320,
+    "y": 120,
+    "wires": [["http-response-cap"]]
+  },
+  {
+    "id": "http-response-cap",
+    "type": "http response",
+    "z": "tab-cap",
+    "name": "Respond",
+    "x": 520,
+    "y": 120,
+    "wires": []
+  },
+  {
+    "id": "mqtt-in-cap",
+    "type": "mqtt in",
+    "z": "tab-cap",
+    "name": "MQTT input",
+    "topic": "sensors/temperature",
+    "x": 120,
+    "y": 200,
+    "wires": [["mqtt-out-cap"]]
+  },
+  {
+    "id": "mqtt-out-cap",
+    "type": "mqtt out",
+    "z": "tab-cap",
+    "name": "MQTT output",
+    "topic": "alerts/temperature",
+    "x": 320,
+    "y": 200,
+    "wires": []
+  },
+  {
+    "id": "file-in-cap",
+    "type": "file in",
+    "z": "tab-cap",
+    "name": "Read file",
+    "filename": "/var/data/input.txt",
+    "x": 120,
+    "y": 280,
+    "wires": [["file-out-cap"]]
+  },
+  {
+    "id": "file-out-cap",
+    "type": "file",
+    "z": "tab-cap",
+    "name": "Write file",
+    "filename": "/var/data/output.txt",
+    "x": 320,
+    "y": 280,
+    "wires": []
+  },
+  {
+    "id": "exec-cap",
+    "type": "exec",
+    "z": "tab-cap",
+    "name": "Run command",
+    "command": "uptime",
+    "x": 520,
+    "y": 280,
+    "wires": []
+  }
+]

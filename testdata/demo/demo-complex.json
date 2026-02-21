@@ -1,0 +1,228 @@
+[
+  {
+    "id": "tab-demo-main",
+    "type": "tab",
+    "label": "Demo Main",
+    "disabled": false
+  },
+  {
+    "id": "tab-demo-ops",
+    "type": "tab",
+    "label": "Demo Ops",
+    "disabled": false
+  },
+  {
+    "id": "subflow-clean",
+    "type": "subflow",
+    "name": "Clean Payload",
+    "info": "Normalize and scrub payload fields",
+    "in": [{ "x": 40, "y": 40, "wires": [{ "id": "sf-clean-1" }] }],
+    "out": [{ "x": 360, "y": 40, "wires": [{ "id": "sf-clean-2", "port": 0 }] }]
+  },
+  {
+    "id": "sf-clean-1",
+    "type": "function",
+    "z": "subflow-clean",
+    "name": "Scrub Fields",
+    "x": 140,
+    "y": 80,
+    "wires": [["sf-clean-2"]],
+    "func": "msg.payload = (msg.payload || '').toString().trim(); return msg;",
+    "password": "demo-password-123456"
+  },
+  {
+    "id": "sf-clean-2",
+    "type": "change",
+    "z": "subflow-clean",
+    "name": "Normalize",
+    "x": 280,
+    "y": 80,
+    "wires": [[]],
+    "rules": [{ "t": "set", "p": "normalized", "pt": "msg", "to": "true", "tot": "bool" }]
+  },
+  {
+    "id": "subflow-enrich",
+    "type": "subflow",
+    "name": "Enrich Payload",
+    "info": "Fetch metadata and attach",
+    "in": [{ "x": 40, "y": 40, "wires": [{ "id": "sf-enrich-1" }] }],
+    "out": [{ "x": 360, "y": 40, "wires": [{ "id": "sf-enrich-2", "port": 0 }] }]
+  },
+  {
+    "id": "sf-enrich-1",
+    "type": "http request",
+    "z": "subflow-enrich",
+    "name": "Lookup Metadata",
+    "x": 140,
+    "y": 80,
+    "wires": [["sf-enrich-2"]],
+    "method": "GET",
+    "ret": "obj",
+    "url": "https://api.example.com/meta"
+  },
+  {
+    "id": "sf-enrich-2",
+    "type": "function",
+    "z": "subflow-enrich",
+    "name": "Attach Metadata",
+    "x": 280,
+    "y": 80,
+    "wires": [[]],
+    "func": "msg.meta = msg.payload; return msg;"
+  },
+  {
+    "id": "inject-main",
+    "type": "inject",
+    "z": "tab-demo-main",
+    "name": "Kickoff",
+    "x": 120,
+    "y": 120,
+    "wires": [["subflow-clean-1"]]
+  },
+  {
+    "id": "subflow-clean-1",
+    "type": "subflow:subflow-clean",
+    "z": "tab-demo-main",
+    "name": "Clean",
+    "x": 300,
+    "y": 120,
+    "wires": [["loop-a"]]
+  },
+  {
+    "id": "loop-a",
+    "type": "function",
+    "z": "tab-demo-main",
+    "name": "Loop A",
+    "x": 480,
+    "y": 120,
+    "wires": [["loop-b"]],
+    "func": "msg.count = (msg.count || 0) + 1; return msg;"
+  },
+  {
+    "id": "loop-b",
+    "type": "function",
+    "z": "tab-demo-main",
+    "name": "Loop B",
+    "x": 660,
+    "y": 120,
+    "wires": [["loop-a", "subflow-enrich-1"]],
+    "func": "return msg;"
+  },
+  {
+    "id": "subflow-enrich-1",
+    "type": "subflow:subflow-enrich",
+    "z": "tab-demo-main",
+    "name": "Enrich",
+    "x": 840,
+    "y": 120,
+    "wires": [["change-main"]]
+  },
+  {
+    "id": "change-main",
+    "type": "change",
+    "z": "tab-demo-main",
+    "name": "Add Context",
+    "x": 1020,
+    "y": 120,
+    "wires": [["http-main"]],
+    "rules": [{ "t": "set", "p": "context", "pt": "msg", "to": "demo", "tot": "str" }]
+  },
+  {
+    "id": "http-main",
+    "type": "http request",
+    "z": "tab-demo-main",
+    "name": "Send to API",
+    "x": 1200,
+    "y": 120,
+    "wires": [["mqtt-main", "file-main", "debug-main"]],
+    "method": "POST",
+    "ret": "obj",
+    "url": "https://api.example.com/process"
+  },
+  {
+    "id": "mqtt-main",
+    "type": "mqtt out",
+    "z": "tab-demo-main",
+    "name": "Notify MQTT",
+    "x": 1380,
+    "y": 80,
+    "wires": []
+  },
+  {
+    "id": "file-main",
+    "type": "file out",
+    "z": "tab-demo-main",
+    "name": "Write Audit",
+    "x": 1380,
+    "y": 120,
+    "wires": [],
+    "filename": "/var/log/demo-audit.log"
+  },
+  {
+    "id": "debug-main",
+    "type": "debug",
+    "z": "tab-demo-main",
+    "name": "Inspect",
+    "x": 1380,
+    "y": 160,
+    "wires": []
+  },
+  {
+    "id": "inject-schedule",
+    "type": "inject",
+    "z": "tab-demo-main",
+    "name": "Every 5m",
+    "x": 120,
+    "y": 200,
+    "wires": [["http-main"]]
+  },
+  {
+    "id": "http-in-ops",
+    "type": "http in",
+    "z": "tab-demo-ops",
+    "name": "GET /ops/status",
+    "x": 140,
+    "y": 120,
+    "wires": [["auth-ops"]],
+    "method": "get",
+    "url": "/ops/status"
+  },
+  {
+    "id": "auth-ops",
+    "type": "function",
+    "z": "tab-demo-ops",
+    "name": "Auth",
+    "x": 320,
+    "y": 120,
+    "wires": [["db-ops", "email-ops"]],
+    "func": "msg.user = msg.user || 'ops'; return msg;",
+    "token": "ops-token-xyz-987"
+  },
+  {
+    "id": "db-ops",
+    "type": "postgres",
+    "z": "tab-demo-ops",
+    "name": "Query DB",
+    "x": 520,
+    "y": 100,
+    "wires": [["http-out-ops"]]
+  },
+  {
+    "id": "email-ops",
+    "type": "email",
+    "z": "tab-demo-ops",
+    "name": "Alert Ops",
+    "x": 520,
+    "y": 160,
+    "wires": [["http-out-ops"]]
+  },
+  {
+    "id": "http-out-ops",
+    "type": "http response",
+    "z": "tab-demo-ops",
+    "name": "Reply",
+    "x": 720,
+    "y": 120,
+    "wires": []
+  }
+]

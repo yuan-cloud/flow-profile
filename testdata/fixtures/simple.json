@@ -1,0 +1,33 @@
+[
+  {
+    "id": "tab-simple",
+    "type": "tab",
+    "label": "Simple Flow"
+  },
+  {
+    "id": "comment-simple",
+    "type": "comment",
+    "z": "tab-simple",
+    "name": "Fixture: simple.json - inject -> debug",
+    "x": 140,
+    "y": 40
+  },
+  {
+    "id": "inject-simple",
+    "type": "inject",
+    "z": "tab-simple",
+    "name": "Start",
+    "x": 120,
+    "y": 120,
+    "wires": [["debug-simple"]]
+  },
+  {
+    "id": "debug-simple",
+    "type": "debug",
+    "z": "tab-simple",
+    "name": "Log",
+    "x": 340,
+    "y": 120,
+    "wires": []
+  }
+]

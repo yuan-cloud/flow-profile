@@ -1,0 +1,82 @@
+[
+  {
+    "id": "tab-demo-api",
+    "type": "tab",
+    "label": "Demo API",
+    "disabled": false
+  },
+  {
+    "id": "http-in-api",
+    "type": "http in",
+    "z": "tab-demo-api",
+    "name": "POST /api/demo",
+    "x": 120,
+    "y": 120,
+    "wires": [["auth-api"]],
+    "method": "post",
+    "url": "/api/demo"
+  },
+  {
+    "id": "auth-api",
+    "type": "function",
+    "z": "tab-demo-api",
+    "name": "Auth Gate",
+    "x": 320,
+    "y": 120,
+    "wires": [["switch-api"]],
+    "func": "msg.user = msg.user || 'demo'; return msg;",
+    "authToken": "demo-token-abcdef123"
+  },
+  {
+    "id": "switch-api",
+    "type": "switch",
+    "z": "tab-demo-api",
+    "name": "Route",
+    "x": 520,
+    "y": 120,
+    "wires": [["http-api"], ["email-api"]],
+    "property": "payload",
+    "propertyType": "msg",
+    "rules": [{ "t": "cont" }, { "t": "else" }]
+  },
+  {
+    "id": "http-api",
+    "type": "http request",
+    "z": "tab-demo-api",
+    "name": "Fetch Orders",
+    "x": 720,
+    "y": 80,
+    "wires": [["transform-api"]],
+    "method": "GET",
+    "ret": "obj",
+    "url": "https://api.example.com/orders"
+  },
+  {
+    "id": "transform-api",
+    "type": "change",
+    "z": "tab-demo-api",
+    "name": "Shape Response",
+    "x": 920,
+    "y": 80,
+    "wires": [["http-out-api"]],
+    "rules": [{ "t": "set", "p": "payload", "pt": "msg", "to": "payload", "tot": "msg" }]
+  },
+  {
+    "id": "email-api",
+    "type": "email",
+    "z": "tab-demo-api",
+    "name": "Notify Ops",
+    "x": 720,
+    "y": 160,
+    "wires": [["http-out-api"]]
+  },
+  {
+    "id": "http-out-api",
+    "type": "http response",
+    "z": "tab-demo-api",
+    "name": "Respond",
+    "x": 1100,
+    "y": 120,
+    "wires": []
+  }
+]

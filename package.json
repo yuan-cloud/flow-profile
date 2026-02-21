@@ -1,0 +1,47 @@
+{
+  "name": "flow-profile",
+  "version": "0.0.1",
+  "private": true,
+  "license": "MIT",
+  "author": "Yuan Liu",
+  "description": "Deterministic, local-first context hygiene tool for Node-RED flows",
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "scripts": {
+    "test": "vitest run && bun run --cwd packages/ui test && bun run --cwd apps/web test",
+    "test:watch": "vitest",
+    "test:update": "vitest --update",
+    "test:coverage": "vitest run --coverage && bun run --cwd packages/ui vitest run --coverage && bun run --cwd apps/web vitest run --coverage",
+    "lint": "biome check .",
+    "lint:fix": "biome check --write .",
+    "format": "biome format --write .",
+    "format:check": "biome format .",
+    "build": "bun run --filter '*' build",
+    "typecheck": "bun run --filter '*' typecheck",
+    "check:core-compat": "bash scripts/check-browser-compat.sh",
+    "clean": "echo \"Clean disabled. Request explicit approval to run: rm -rf packages/*/dist apps/*/dist\" && exit 1",
+    "dev": "bun run --cwd apps/web dev",
+    "docs:api": "bun run docs:api:core && bun run docs:api:cli && bun run docs:api:ai && bun run docs:api:ui",
+    "docs:api:core": "typedoc --options typedoc.base.json --tsconfig packages/core/tsconfig.json --entryPoints packages/core/src/index.ts --out docs/api/core",
+    "docs:api:cli": "typedoc --options typedoc.base.json --tsconfig packages/cli/tsconfig.json --entryPoints packages/cli/src/index.ts --out docs/api/cli",
+    "docs:api:ai": "typedoc --options typedoc.base.json --tsconfig packages/ai/tsconfig.json --entryPoints packages/ai/src/index.ts --out docs/api/ai",
+    "docs:api:ui": "typedoc --options typedoc.base.json --tsconfig packages/ui/tsconfig.json --entryPoints packages/ui/src/index.ts --out docs/api/ui"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^2.3.13",
+    "@types/node": "^25.1.0",
+    "@vitest/coverage-istanbul": "^4.0.18",
+    "@vue/test-utils": "^2.4.6",
+    "fflate": "^0.8.2",
+    "happy-dom": "^20.5.0",
+    "typedoc": "^0.27.6",
+    "typescript": "^5.9.3",
+    "vitest": "^4.0.18"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "packageManager": "bun@1.1.0"
+}

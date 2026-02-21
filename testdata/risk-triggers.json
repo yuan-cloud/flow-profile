@@ -1,0 +1,136 @@
+[
+  {
+    "id": "tab1",
+    "type": "tab",
+    "label": "Risk Triggers Flow",
+    "disabled": false
+  },
+  {
+    "id": "http-in-no-catch",
+    "type": "http in",
+    "z": "tab1",
+    "name": "API Endpoint",
+    "url": "/api/data",
+    "method": "post",
+    "x": 100,
+    "y": 100,
+    "wires": [["function-with-input"]]
+  },
+  {
+    "id": "function-with-input",
+    "type": "function",
+    "z": "tab1",
+    "name": "Process Data",
+    "func": "msg.payload = msg.payload.toUpperCase();\nreturn msg;",
+    "x": 300,
+    "y": 100,
+    "wires": [["http-response"]]
+  },
+  {
+    "id": "http-response",
+    "type": "http response",
+    "z": "tab1",
+    "name": "Send Response",
+    "x": 500,
+    "y": 100,
+    "wires": []
+  },
+  {
+    "id": "self-loop-node",
+    "type": "function",
+    "z": "tab1",
+    "name": "Self Loop",
+    "func": "return msg;",
+    "x": 100,
+    "y": 200,
+    "wires": [["self-loop-node"]]
+  },
+  {
+    "id": "cycle-a",
+    "type": "function",
+    "z": "tab1",
+    "name": "Cycle Node A",
+    "func": "return msg;",
+    "x": 100,
+    "y": 300,
+    "wires": [["cycle-b"]]
+  },
+  {
+    "id": "cycle-b",
+    "type": "function",
+    "z": "tab1",
+    "name": "Cycle Node B",
+    "func": "return msg;",
+    "x": 300,
+    "y": 300,
+    "wires": [["cycle-a"]]
+  },
+  {
+    "id": "node-with-secret",
+    "type": "function",
+    "z": "tab1",
+    "name": "Config with Secret",
+    "func": "return msg;",
+    "x": 100,
+    "y": 400,
+    "wires": [],
+    "password": "sUp3rS3cr3tP@ssw0rd!",
+    "apiKey": "sk-proj-abcdef1234567890GHIJKLMNOP"
+  },
+  {
+    "id": "exec-node",
+    "type": "exec",
+    "z": "tab1",
+    "name": "Run Command",
+    "command": "ls -la",
+    "addpay": true,
+    "append": "",
+    "useSpawn": false,
+    "timer": "",
+    "x": 100,
+    "y": 500,
+    "wires": [[], [], []]
+  },
+  {
+    "id": "mqtt-input",
+    "type": "mqtt in",
+    "z": "tab1",
+    "name": "MQTT Input",
+    "topic": "sensors/#",
+    "qos": "1",
+    "x": 100,
+    "y": 600,
+    "wires": [["template-with-input"]]
+  },
+  {
+    "id": "template-with-input",
+    "type": "template",
+    "z": "tab1",
+    "name": "Dynamic Template",
+    "template": "{{payload}}",
+    "x": 300,
+    "y": 600,
+    "wires": [["debug-output"]]
+  },
+  {
+    "id": "debug-output",
+    "type": "debug",
+    "z": "tab1",
+    "name": "Output",
+    "x": 500,
+    "y": 600,
+    "wires": [],
+    "active": true
+  },
+  {
+    "id": "config1",
+    "type": "mqtt-broker",
+    "name": "Test MQTT Broker",
+    "broker": "localhost",
+    "port": "1883",
+    "credentials": {
+      "username": "admin",
+      "password": "y8K#mN2$xPqR9vL!"
+    }
+  }
+]

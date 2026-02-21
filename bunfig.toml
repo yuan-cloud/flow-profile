@@ -1,0 +1,4 @@
+[test]
+exclude = [
+  "apps/web/e2e/**"
+]

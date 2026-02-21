@@ -1,0 +1,3825 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`Determinism harness > matches snapshot for capability-surface.json 1`] = `
+"{
+  "ioSurface": {
+    "inputs": [
+      {
+        "name": "Read file",
+        "nodeId": "file-in-cap",
+        "type": "file in"
+      },
+      {
+        "name": "HTTP endpoint",
+        "nodeId": "http-in-cap",
+        "type": "http in"
+      },
+      {
+        "name": "MQTT input",
+        "nodeId": "mqtt-in-cap",
+        "type": "mqtt in"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "Run command",
+        "nodeId": "exec-cap",
+        "type": "exec"
+      },
+      {
+        "name": "Write file",
+        "nodeId": "file-out-cap",
+        "type": "file"
+      },
+      {
+        "name": "Respond",
+        "nodeId": "http-response-cap",
+        "type": "http response"
+      },
+      {
+        "name": "MQTT output",
+        "nodeId": "mqtt-out-cap",
+        "type": "mqtt out"
+      }
+    ]
+  },
+  "nodeTypes": [
+    {
+      "category": "logic",
+      "count": 1,
+      "type": "comment"
+    },
+    {
+      "category": "output",
+      "count": 1,
+      "type": "exec"
+    },
+    {
+      "category": "output",
+      "count": 1,
+      "type": "file"
+    },
+    {
+      "category": "input",
+      "count": 1,
+      "type": "file in"
+    },
+    {
+      "category": "logic",
+      "count": 1,
+      "type": "function"
+    },
+    {
+      "category": "input",
+      "count": 1,
+      "type": "http in"
+    },
+    {
+      "category": "output",
+      "count": 1,
+      "type": "http response"
+    },
+    {
+      "category": "input",
+      "count": 1,
+      "type": "mqtt in"
+    },
+    {
+      "category": "output",
+      "count": 1,
+      "type": "mqtt out"
+    }
+  ],
+  "subflows": [],
+  "summary": {
+    "configNodeCount": 0,
+    "edgeCount": 4,
+    "nodeCount": 9,
+    "subflowCount": 0,
+    "tabCount": 1
+  },
+  "tabs": [
+    {
+      "categories": {
+        "config": 0,
+        "input": 3,
+        "logic": 2,
+        "output": 4,
+        "subflow": 0
+      },
+      "id": "tab-cap",
+      "name": "Capability Surface",
+      "nodeCount": 9
+    }
+  ],
+  "version": "1.0"
+}"
+`;
+
+exports[`Determinism harness > matches snapshot for capability-surface.json 2`] = `
+"{
+  "metadata": {
+    "analyzedNodes": 7,
+    "totalNodes": 9,
+    "uncertainCount": 0
+  },
+  "resources": [
+    {
+      "confidence": "high",
+      "description": "File: /var/data/input.txt",
+      "inferred": false,
+      "name": "File input",
+      "nodeId": "file-in-cap",
+      "nodeName": "Read file",
+      "type": "resource"
+    },
+    {
+      "confidence": "high",
+      "description": "HTTP endpoint: GET /api/cap",
+      "inferred": false,
+      "name": "HTTP endpoint",
+      "nodeId": "http-in-cap",
+      "nodeName": "HTTP endpoint",
+      "type": "resource"
+    },
+    {
+      "confidence": "high",
+      "description": "MQTT subscription: sensors/temperature",
+      "inferred": false,
+      "name": "MQTT subscription",
+      "nodeId": "mqtt-in-cap",
+      "nodeName": "MQTT input",
+      "type": "resource"
+    }
+  ],
+  "tools": [
+    {
+      "confidence": "high",
+      "description": "Execute system command: uptime",
+      "inferred": false,
+      "name": "Execute system command",
+      "nodeId": "exec-cap",
+      "nodeName": "Run command",
+      "type": "tool"
+    },
+    {
+      "confidence": "high",
+      "description": "Write to file: /var/data/output.txt",
+      "inferred": false,
+      "name": "Write to file",
+      "nodeId": "file-out-cap",
+      "nodeName": "Write file",
+      "type": "tool"
+    },
+    {
+      "confidence": "high",
+      "description": "Respond to HTTP requests",
+      "inferred": false,
+      "name": "Respond to HTTP requests",
+      "nodeId": "http-response-cap",
+      "nodeName": "Respond",
+      "type": "tool"
+    },
+    {
+      "confidence": "high",
+      "description": "Publish to MQTT topic: alerts/temperature",
+      "inferred": false,
+      "name": "Publish to MQTT topic",
+      "nodeId": "mqtt-out-cap",
+      "nodeName": "MQTT output",
+      "type": "tool"
+    }
+  ],
+  "version": "1.0"
+}"
+`;
+
+exports[`Determinism harness > matches snapshot for capability-surface.json 3`] = `
+"# Flow Context
+
+## Summary
+- 1 tabs, 9 nodes, 0 subflows
+- Token estimate: ~117 (budget: 8000)
+- Token status: ok
+
+## I/O Surface
+### Inputs
+- file in (Read file)
+- http in (HTTP endpoint)
+- mqtt in (MQTT input)
+
+### Outputs
+- exec (Run command)
+- file (Write file)
+- http response (Respond)
+- mqtt out (MQTT output)
+
+## Capabilities Summary
+- **Tools (actions)**: 4
+- **Resources (data sources)**: 3
+
+## Flow Structure
+### Tab: Capability Surface
+- comment (Fixture: capability-surface.json - tools vs resources)
+- exec (Run command)
+- file in (Read file)
+- file (Write file)
+- function (Process)
+- http in (HTTP endpoint)
+- http response (Respond)
+- mqtt in (MQTT input)
+- mqtt out (MQTT output)
+
+## Function Code
+### Function: Process
+\`\`\`js
+msg.payload = { ok: true }; return msg;
+\`\`\`
+
+## Redactions
+0 values redacted
+
+## Risk Findings
+- Command execution node: "Run command" (medium)
+- Dynamic code with external input: "Process" (medium)
+- No catch node in flow "Capability Surface" (medium)"
+`;
+
+exports[`Determinism harness > matches snapshot for capability-surface.json 4`] = `
+"{
+  "findingCount": 3,
+  "findings": [
+    {
+      "affectedNodes": [
+        {
+          "id": "exec-cap",
+          "name": "Run command"
+        }
+      ],
+      "confidence": "low",
+      "description": "Node \\"Run command\\" (exec) executes system commands, which can be dangerous if inputs are not sanitized.",
+      "evidence": "Node type \\"exec\\" can execute arbitrary commands",
+      "id": "RISK_INJECTION_PRONE",
+      "remediation": "Validate and sanitize all inputs before passing to exec nodes. Consider using allowlists for command parameters.",
+      "severity": "medium",
+      "title": "Command execution node: \\"Run command\\""
+    },
+    {
+      "affectedNodes": [
+        {
+          "id": "http-in-cap",
+          "name": "HTTP endpoint"
+        },
+        {
+          "id": "function-cap",
+          "name": "Process"
+        }
+      ],
+      "confidence": "low",
+      "description": "Node \\"Process\\" (function) evaluates dynamic content and receives input from an external source.",
+      "evidence": "HTTP endpoint -> Process. Function receives external input; review for dynamic code usage",
+      "id": "RISK_INJECTION_PRONE",
+      "remediation": "Validate and sanitize external inputs before using in function or template nodes. Avoid eval() patterns.",
+      "severity": "medium",
+      "title": "Dynamic code with external input: \\"Process\\""
+    },
+    {
+      "affectedNodes": [
+        {
+          "id": "exec-cap",
+          "name": "Run command"
+        },
+        {
+          "id": "file-out-cap",
+          "name": "Write file"
+        },
+        {
+          "id": "http-response-cap",
+          "name": "Respond"
+        },
+        {
+          "id": "mqtt-out-cap",
+          "name": "MQTT output"
+        }
+      ],
+      "confidence": "high",
+      "description": "Flow \\"Capability Surface\\" contains 4 output node(s) but no catch node to handle errors.",
+      "evidence": "Tab \\"Capability Surface\\" has 4 output node(s) and no catch node. Output types: exec, file, http response, mqtt out",
+      "id": "RISK_NO_CATCH",
+      "remediation": "Add a catch node to handle errors. Connect it to a debug node or error handler.",
+      "severity": "medium",
+      "title": "No catch node in flow \\"Capability Surface\\""
+    }
+  ],
+  "metadata": {
+    "rulesRun": [
+      "RISK_NO_CATCH",
+      "RISK_INFINITE_LOOP",
+      "RISK_HIGH_ENTROPY",
+      "RISK_INJECTION_PRONE"
+    ]
+  },
+  "version": "1.0"
+}"
+`;
+
+exports[`Determinism harness > matches snapshot for large-500-nodes.json 1`] = `
+"{
+  "ioSurface": {
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "Sink",
+        "nodeId": "debug-large",
+        "type": "debug"
+      }
+    ]
+  },
+  "nodeTypes": [
+    {
+      "category": "logic",
+      "count": 1,
+      "type": "comment"
+    },
+    {
+      "category": "output",
+      "count": 1,
+      "type": "debug"
+    },
+    {
+      "category": "logic",
+      "count": 500,
+      "type": "function"
+    }
+  ],
+  "subflows": [],
+  "summary": {
+    "configNodeCount": 0,
+    "edgeCount": 500,
+    "nodeCount": 502,
+    "subflowCount": 0,
+    "tabCount": 1
+  },
+  "tabs": [
+    {
+      "categories": {
+        "config": 0,
+        "input": 0,
+        "logic": 501,
+        "output": 1,
+        "subflow": 0
+      },
+      "id": "tab-large",
+      "name": "Large Flow 500+",
+      "nodeCount": 502
+    }
+  ],
+  "version": "1.0"
+}"
+`;
+
+exports[`Determinism harness > matches snapshot for large-500-nodes.json 2`] = `
+"{
+  "metadata": {
+    "analyzedNodes": 1,
+    "totalNodes": 502,
+    "uncertainCount": 1
+  },
+  "resources": [],
+  "tools": [
+    {
+      "confidence": "medium",
+      "description": "Emit debug output",
+      "inferred": true,
+      "name": "Debug output",
+      "nodeId": "debug-large",
+      "nodeName": "Sink",
+      "type": "tool"
+    }
+  ],
+  "version": "1.0"
+}"
+`;
+
+exports[`Determinism harness > matches snapshot for large-500-nodes.json 3`] = `
+"# Flow Context
+
+## Summary
+- 1 tabs, 502 nodes, 0 subflows
+- Token estimate: ~3890 (budget: 8000)
+- Token status: ok
+
+## I/O Surface
+### Inputs
+- None
+
+### Outputs
+- debug (Sink)
+
+## Capabilities Summary
+- **Tools (actions)**: 1
+- **Resources (data sources)**: 0
+
+## Flow Structure
+### Tab: Large Flow 500+
+- comment (Fixture: large-500-nodes.json - performance)
+- debug (Sink)
+- function (Node 1)
+- function (Node 2)
+- function (Node 3)
+- function (Node 4)
+- function (Node 5)
+- function (Node 6)
+- function (Node 7)
+- function (Node 8)
+- function (Node 9)
+- function (Node 10)
+- function (Node 11)
+- function (Node 12)
+- function (Node 13)
+- function (Node 14)
+- function (Node 15)
+- function (Node 16)
+- function (Node 17)
+- function (Node 18)
+- function (Node 19)
+- function (Node 20)
+- function (Node 21)
+- function (Node 22)
+- function (Node 23)
+- function (Node 24)
+- function (Node 25)
+- function (Node 26)
+- function (Node 27)
+- function (Node 28)
+- function (Node 29)
+- function (Node 30)
+- function (Node 31)
+- function (Node 32)
+- function (Node 33)
+- function (Node 34)
+- function (Node 35)
+- function (Node 36)
+- function (Node 37)
+- function (Node 38)
+- function (Node 39)
+- function (Node 40)
+- function (Node 41)
+- function (Node 42)
+- function (Node 43)
+- function (Node 44)
+- function (Node 45)
+- function (Node 46)
+- function (Node 47)
+- function (Node 48)
+- function (Node 49)
+- function (Node 50)
+- function (Node 51)
+- function (Node 52)
+- function (Node 53)
+- function (Node 54)
+- function (Node 55)
+- function (Node 56)
+- function (Node 57)
+- function (Node 58)
+- function (Node 59)
+- function (Node 60)
+- function (Node 61)
+- function (Node 62)
+- function (Node 63)
+- function (Node 64)
+- function (Node 65)
+- function (Node 66)
+- function (Node 67)
+- function (Node 68)
+- function (Node 69)
+- function (Node 70)
+- function (Node 71)
+- function (Node 72)
+- function (Node 73)
+- function (Node 74)
+- function (Node 75)
+- function (Node 76)
+- function (Node 77)
+- function (Node 78)
+- function (Node 79)
+- function (Node 80)
+- function (Node 81)
+- function (Node 82)
+- function (Node 83)
+- function (Node 84)
+- function (Node 85)
+- function (Node 86)
+- function (Node 87)
+- function (Node 88)
+- function (Node 89)
+- function (Node 90)
+- function (Node 91)
+- function (Node 92)
+- function (Node 93)
+- function (Node 94)
+- function (Node 95)
+- function (Node 96)
+- function (Node 97)
+- function (Node 98)
+- function (Node 99)
+- function (Node 100)
+- function (Node 101)
+- function (Node 102)
+- function (Node 103)
+- function (Node 104)
+- function (Node 105)
+- function (Node 106)
+- function (Node 107)
+- function (Node 108)
+- function (Node 109)
+- function (Node 110)
+- function (Node 111)
+- function (Node 112)
+- function (Node 113)
+- function (Node 114)
+- function (Node 115)
+- function (Node 116)
+- function (Node 117)
+- function (Node 118)
+- function (Node 119)
+- function (Node 120)
+- function (Node 121)
+- function (Node 122)
+- function (Node 123)
+- function (Node 124)
+- function (Node 125)
+- function (Node 126)
+- function (Node 127)
+- function (Node 128)
+- function (Node 129)
+- function (Node 130)
+- function (Node 131)
+- function (Node 132)
+- function (Node 133)
+- function (Node 134)
+- function (Node 135)
+- function (Node 136)
+- function (Node 137)
+- function (Node 138)
+- function (Node 139)
+- function (Node 140)
+- function (Node 141)
+- function (Node 142)
+- function (Node 143)
+- function (Node 144)
+- function (Node 145)
+- function (Node 146)
+- function (Node 147)
+- function (Node 148)
+- function (Node 149)
+- function (Node 150)
+- function (Node 151)
+- function (Node 152)
+- function (Node 153)
+- function (Node 154)
+- function (Node 155)
+- function (Node 156)
+- function (Node 157)
+- function (Node 158)
+- function (Node 159)
+- function (Node 160)
+- function (Node 161)
+- function (Node 162)
+- function (Node 163)
+- function (Node 164)
+- function (Node 165)
+- function (Node 166)
+- function (Node 167)
+- function (Node 168)
+- function (Node 169)
+- function (Node 170)
+- function (Node 171)
+- function (Node 172)
+- function (Node 173)
+- function (Node 174)
+- function (Node 175)
+- function (Node 176)
+- function (Node 177)
+- function (Node 178)
+- function (Node 179)
+- function (Node 180)
+- function (Node 181)
+- function (Node 182)
+- function (Node 183)
+- function (Node 184)
+- function (Node 185)
+- function (Node 186)
+- function (Node 187)
+- function (Node 188)
+- function (Node 189)
+- function (Node 190)
+- function (Node 191)
+- function (Node 192)
+- function (Node 193)
+- function (Node 194)
+- function (Node 195)
+- function (Node 196)
+- function (Node 197)
+- function (Node 198)
+- function (Node 199)
+- function (Node 200)
+- function (Node 201)
+- function (Node 202)
+- function (Node 203)
+- function (Node 204)
+- function (Node 205)
+- function (Node 206)
+- function (Node 207)
+- function (Node 208)
+- function (Node 209)
+- function (Node 210)
+- function (Node 211)
+- function (Node 212)
+- function (Node 213)
+- function (Node 214)
+- function (Node 215)
+- function (Node 216)
+- function (Node 217)
+- function (Node 218)
+- function (Node 219)
+- function (Node 220)
+- function (Node 221)
+- function (Node 222)
+- function (Node 223)
+- function (Node 224)
+- function (Node 225)
+- function (Node 226)
+- function (Node 227)
+- function (Node 228)
+- function (Node 229)
+- function (Node 230)
+- function (Node 231)
+- function (Node 232)
+- function (Node 233)
+- function (Node 234)
+- function (Node 235)
+- function (Node 236)
+- function (Node 237)
+- function (Node 238)
+- function (Node 239)
+- function (Node 240)
+- function (Node 241)
+- function (Node 242)
+- function (Node 243)
+- function (Node 244)
+- function (Node 245)
+- function (Node 246)
+- function (Node 247)
+- function (Node 248)
+- function (Node 249)
+- function (Node 250)
+- function (Node 251)
+- function (Node 252)
+- function (Node 253)
+- function (Node 254)
+- function (Node 255)
+- function (Node 256)
+- function (Node 257)
+- function (Node 258)
+- function (Node 259)
+- function (Node 260)
+- function (Node 261)
+- function (Node 262)
+- function (Node 263)
+- function (Node 264)
+- function (Node 265)
+- function (Node 266)
+- function (Node 267)
+- function (Node 268)
+- function (Node 269)
+- function (Node 270)
+- function (Node 271)
+- function (Node 272)
+- function (Node 273)
+- function (Node 274)
+- function (Node 275)
+- function (Node 276)
+- function (Node 277)
+- function (Node 278)
+- function (Node 279)
+- function (Node 280)
+- function (Node 281)
+- function (Node 282)
+- function (Node 283)
+- function (Node 284)
+- function (Node 285)
+- function (Node 286)
+- function (Node 287)
+- function (Node 288)
+- function (Node 289)
+- function (Node 290)
+- function (Node 291)
+- function (Node 292)
+- function (Node 293)
+- function (Node 294)
+- function (Node 295)
+- function (Node 296)
+- function (Node 297)
+- function (Node 298)
+- function (Node 299)
+- function (Node 300)
+- function (Node 301)
+- function (Node 302)
+- function (Node 303)
+- function (Node 304)
+- function (Node 305)
+- function (Node 306)
+- function (Node 307)
+- function (Node 308)
+- function (Node 309)
+- function (Node 310)
+- function (Node 311)
+- function (Node 312)
+- function (Node 313)
+- function (Node 314)
+- function (Node 315)
+- function (Node 316)
+- function (Node 317)
+- function (Node 318)
+- function (Node 319)
+- function (Node 320)
+- function (Node 321)
+- function (Node 322)
+- function (Node 323)
+- function (Node 324)
+- function (Node 325)
+- function (Node 326)
+- function (Node 327)
+- function (Node 328)
+- function (Node 329)
+- function (Node 330)
+- function (Node 331)
+- function (Node 332)
+- function (Node 333)
+- function (Node 334)
+- function (Node 335)
+- function (Node 336)
+- function (Node 337)
+- function (Node 338)
+- function (Node 339)
+- function (Node 340)
+- function (Node 341)
+- function (Node 342)
+- function (Node 343)
+- function (Node 344)
+- function (Node 345)
+- function (Node 346)
+- function (Node 347)
+- function (Node 348)
+- function (Node 349)
+- function (Node 350)
+- function (Node 351)
+- function (Node 352)
+- function (Node 353)
+- function (Node 354)
+- function (Node 355)
+- function (Node 356)
+- function (Node 357)
+- function (Node 358)
+- function (Node 359)
+- function (Node 360)
+- function (Node 361)
+- function (Node 362)
+- function (Node 363)
+- function (Node 364)
+- function (Node 365)
+- function (Node 366)
+- function (Node 367)
+- function (Node 368)
+- function (Node 369)
+- function (Node 370)
+- function (Node 371)
+- function (Node 372)
+- function (Node 373)
+- function (Node 374)
+- function (Node 375)
+- function (Node 376)
+- function (Node 377)
+- function (Node 378)
+- function (Node 379)
+- function (Node 380)
+- function (Node 381)
+- function (Node 382)
+- function (Node 383)
+- function (Node 384)
+- function (Node 385)
+- function (Node 386)
+- function (Node 387)
+- function (Node 388)
+- function (Node 389)
+- function (Node 390)
+- function (Node 391)
+- function (Node 392)
+- function (Node 393)
+- function (Node 394)
+- function (Node 395)
+- function (Node 396)
+- function (Node 397)
+- function (Node 398)
+- function (Node 399)
+- function (Node 400)
+- function (Node 401)
+- function (Node 402)
+- function (Node 403)
+- function (Node 404)
+- function (Node 405)
+- function (Node 406)
+- function (Node 407)
+- function (Node 408)
+- function (Node 409)
+- function (Node 410)
+- function (Node 411)
+- function (Node 412)
+- function (Node 413)
+- function (Node 414)
+- function (Node 415)
+- function (Node 416)
+- function (Node 417)
+- function (Node 418)
+- function (Node 419)
+- function (Node 420)
+- function (Node 421)
+- function (Node 422)
+- function (Node 423)
+- function (Node 424)
+- function (Node 425)
+- function (Node 426)
+- function (Node 427)
+- function (Node 428)
+- function (Node 429)
+- function (Node 430)
+- function (Node 431)
+- function (Node 432)
+- function (Node 433)
+- function (Node 434)
+- function (Node 435)
+- function (Node 436)
+- function (Node 437)
+- function (Node 438)
+- function (Node 439)
+- function (Node 440)
+- function (Node 441)
+- function (Node 442)
+- function (Node 443)
+- function (Node 444)
+- function (Node 445)
+- function (Node 446)
+- function (Node 447)
+- function (Node 448)
+- function (Node 449)
+- function (Node 450)
+- function (Node 451)
+- function (Node 452)
+- function (Node 453)
+- function (Node 454)
+- function (Node 455)
+- function (Node 456)
+- function (Node 457)
+- function (Node 458)
+- function (Node 459)
+- function (Node 460)
+- function (Node 461)
+- function (Node 462)
+- function (Node 463)
+- function (Node 464)
+- function (Node 465)
+- function (Node 466)
+- function (Node 467)
+- function (Node 468)
+- function (Node 469)
+- function (Node 470)
+- function (Node 471)
+- function (Node 472)
+- function (Node 473)
+- function (Node 474)
+- function (Node 475)
+- function (Node 476)
+- function (Node 477)
+- function (Node 478)
+- function (Node 479)
+- function (Node 480)
+- function (Node 481)
+- function (Node 482)
+- function (Node 483)
+- function (Node 484)
+- function (Node 485)
+- function (Node 486)
+- function (Node 487)
+- function (Node 488)
+- function (Node 489)
+- function (Node 490)
+- function (Node 491)
+- function (Node 492)
+- function (Node 493)
+- function (Node 494)
+- function (Node 495)
+- function (Node 496)
+- function (Node 497)
+- function (Node 498)
+- function (Node 499)
+- function (Node 500)
+
+## Function Code
+### Function: Node 1
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 2
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 3
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 4
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 5
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 6
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 7
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 8
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 9
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 10
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 11
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 12
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 13
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 14
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 15
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 16
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 17
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 18
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 19
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 20
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 21
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 22
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 23
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 24
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 25
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 26
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 27
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 28
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 29
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 30
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 31
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 32
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 33
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 34
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 35
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 36
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 37
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 38
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 39
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 40
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 41
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 42
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 43
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 44
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 45
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 46
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 47
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 48
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 49
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 50
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 51
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 52
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 53
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 54
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 55
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 56
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 57
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 58
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 59
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 60
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 61
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 62
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 63
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 64
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 65
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 66
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 67
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 68
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 69
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 70
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 71
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 72
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 73
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 74
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 75
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 76
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 77
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 78
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 79
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 80
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 81
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 82
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 83
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 84
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 85
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 86
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 87
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 88
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 89
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 90
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 91
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 92
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 93
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 94
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 95
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 96
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 97
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 98
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 99
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 100
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 101
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 102
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 103
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 104
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 105
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 106
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 107
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 108
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 109
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 110
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 111
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 112
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 113
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 114
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 115
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 116
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 117
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 118
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 119
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 120
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 121
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 122
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 123
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 124
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 125
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 126
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 127
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 128
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 129
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 130
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 131
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 132
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 133
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 134
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 135
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 136
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 137
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 138
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 139
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 140
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 141
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 142
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 143
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 144
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 145
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 146
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 147
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 148
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 149
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 150
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 151
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 152
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 153
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 154
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 155
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 156
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 157
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 158
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 159
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 160
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 161
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 162
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 163
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 164
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 165
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 166
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 167
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 168
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 169
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 170
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 171
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 172
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 173
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 174
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 175
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 176
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 177
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 178
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 179
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 180
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 181
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 182
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 183
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 184
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 185
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 186
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 187
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 188
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 189
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 190
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 191
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 192
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 193
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 194
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 195
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 196
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 197
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 198
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 199
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 200
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 201
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 202
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 203
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 204
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 205
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 206
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 207
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 208
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 209
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 210
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 211
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 212
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 213
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 214
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 215
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 216
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 217
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 218
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 219
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 220
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 221
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 222
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 223
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 224
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 225
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 226
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 227
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 228
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 229
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 230
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 231
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 232
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 233
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 234
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 235
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 236
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 237
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 238
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 239
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 240
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 241
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 242
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 243
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 244
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 245
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 246
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 247
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 248
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 249
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 250
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 251
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 252
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 253
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 254
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 255
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 256
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 257
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 258
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 259
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 260
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 261
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 262
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 263
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 264
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 265
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 266
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 267
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 268
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 269
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 270
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 271
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 272
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 273
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 274
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 275
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 276
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 277
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 278
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 279
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 280
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 281
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 282
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 283
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 284
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 285
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 286
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 287
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 288
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 289
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 290
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 291
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 292
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 293
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 294
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 295
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 296
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 297
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 298
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 299
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 300
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 301
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 302
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 303
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 304
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 305
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 306
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 307
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 308
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 309
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 310
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 311
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 312
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 313
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 314
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 315
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 316
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 317
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 318
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 319
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 320
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 321
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 322
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 323
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 324
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 325
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 326
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 327
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 328
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 329
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 330
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 331
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 332
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 333
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 334
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 335
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 336
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 337
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 338
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 339
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 340
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 341
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 342
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 343
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 344
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 345
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 346
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 347
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 348
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 349
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 350
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 351
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 352
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 353
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 354
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 355
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 356
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 357
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 358
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 359
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 360
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 361
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 362
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 363
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 364
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 365
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 366
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 367
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 368
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 369
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 370
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 371
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 372
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 373
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 374
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 375
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 376
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 377
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 378
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 379
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 380
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 381
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 382
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 383
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 384
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 385
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 386
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 387
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 388
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 389
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 390
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 391
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 392
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 393
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 394
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 395
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 396
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 397
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 398
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 399
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 400
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 401
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 402
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 403
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 404
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 405
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 406
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 407
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 408
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 409
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 410
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 411
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 412
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 413
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 414
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 415
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 416
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 417
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 418
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 419
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 420
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 421
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 422
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 423
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 424
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 425
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 426
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 427
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 428
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 429
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 430
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 431
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 432
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 433
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 434
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 435
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 436
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 437
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 438
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 439
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 440
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 441
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 442
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 443
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 444
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 445
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 446
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 447
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 448
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 449
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 450
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 451
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 452
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 453
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 454
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 455
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 456
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 457
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 458
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 459
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 460
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 461
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 462
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 463
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 464
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 465
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 466
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 467
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 468
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 469
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 470
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 471
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 472
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 473
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 474
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 475
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 476
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 477
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 478
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 479
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 480
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 481
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 482
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 483
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 484
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 485
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 486
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 487
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 488
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 489
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 490
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 491
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 492
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 493
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 494
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 495
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 496
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 497
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 498
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 499
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Node 500
+\`\`\`js
+return msg;
+\`\`\`
+
+## Redactions
+0 values redacted
+
+## Risk Findings
+- No catch node in flow "Large Flow 500+" (medium)"
+`;
+
+exports[`Determinism harness > matches snapshot for large-500-nodes.json 4`] = `
+"{
+  "findingCount": 1,
+  "findings": [
+    {
+      "affectedNodes": [
+        {
+          "id": "debug-large",
+          "name": "Sink"
+        }
+      ],
+      "confidence": "high",
+      "description": "Flow \\"Large Flow 500+\\" contains 1 output node(s) but no catch node to handle errors.",
+      "evidence": "Tab \\"Large Flow 500+\\" has 1 output node(s) and no catch node. Output types: debug",
+      "id": "RISK_NO_CATCH",
+      "remediation": "Add a catch node to handle errors. Connect it to a debug node or error handler.",
+      "severity": "medium",
+      "title": "No catch node in flow \\"Large Flow 500+\\""
+    }
+  ],
+  "metadata": {
+    "rulesRun": [
+      "RISK_NO_CATCH",
+      "RISK_INFINITE_LOOP",
+      "RISK_HIGH_ENTROPY",
+      "RISK_INJECTION_PRONE"
+    ]
+  },
+  "version": "1.0"
+}"
+`;
+
+exports[`Determinism harness > matches snapshot for risk-triggers.json 1`] = `
+"{
+  "ioSurface": {
+    "inputs": [
+      {
+        "name": "Incoming request",
+        "nodeId": "http-in",
+        "type": "http in"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "Run command",
+        "nodeId": "exec-node",
+        "type": "exec"
+      },
+      {
+        "name": "Send response",
+        "nodeId": "http-response",
+        "type": "http response"
+      }
+    ]
+  },
+  "nodeTypes": [
+    {
+      "category": "logic",
+      "count": 1,
+      "type": "comment"
+    },
+    {
+      "category": "output",
+      "count": 1,
+      "type": "exec"
+    },
+    {
+      "category": "logic",
+      "count": 3,
+      "type": "function"
+    },
+    {
+      "category": "input",
+      "count": 1,
+      "type": "http in"
+    },
+    {
+      "category": "output",
+      "count": 1,
+      "type": "http response"
+    },
+    {
+      "category": "logic",
+      "count": 1,
+      "type": "template"
+    }
+  ],
+  "subflows": [],
+  "summary": {
+    "configNodeCount": 0,
+    "edgeCount": 5,
+    "nodeCount": 8,
+    "subflowCount": 0,
+    "tabCount": 1
+  },
+  "tabs": [
+    {
+      "categories": {
+        "config": 0,
+        "input": 1,
+        "logic": 5,
+        "output": 2,
+        "subflow": 0
+      },
+      "id": "tab-risk",
+      "name": "Risk Triggers",
+      "nodeCount": 8
+    }
+  ],
+  "version": "1.0"
+}"
+`;
+
+exports[`Determinism harness > matches snapshot for risk-triggers.json 2`] = `
+"{
+  "metadata": {
+    "analyzedNodes": 3,
+    "totalNodes": 8,
+    "uncertainCount": 0
+  },
+  "resources": [
+    {
+      "confidence": "high",
+      "description": "HTTP endpoint: POST /api/test",
+      "inferred": false,
+      "name": "HTTP endpoint",
+      "nodeId": "http-in",
+      "nodeName": "Incoming request",
+      "type": "resource"
+    }
+  ],
+  "tools": [
+    {
+      "confidence": "high",
+      "description": "Execute system command: ls -la",
+      "inferred": false,
+      "name": "Execute system command",
+      "nodeId": "exec-node",
+      "nodeName": "Run command",
+      "type": "tool"
+    },
+    {
+      "confidence": "high",
+      "description": "Respond to HTTP requests",
+      "inferred": false,
+      "name": "Respond to HTTP requests",
+      "nodeId": "http-response",
+      "nodeName": "Send response",
+      "type": "tool"
+    }
+  ],
+  "version": "1.0"
+}"
+`;
+
+exports[`Determinism harness > matches snapshot for risk-triggers.json 3`] = `
+"# Flow Context
+
+## Summary
+- 1 tabs, 8 nodes, 0 subflows
+- Token estimate: ~134 (budget: 8000)
+- Token status: ok
+
+## I/O Surface
+### Inputs
+- http in (Incoming request)
+
+### Outputs
+- exec (Run command)
+- http response (Send response)
+
+## Capabilities Summary
+- **Tools (actions)**: 2
+- **Resources (data sources)**: 1
+
+## Flow Structure
+### Tab: Risk Triggers
+- comment (Fixture: risk-triggers.json - no catch, injection, loops)
+- function (Cycle A)
+- function (Cycle B)
+- exec (Run command)
+- http in (Incoming request)
+- http response (Send response)
+- function (Self loop)
+- template (Render template)
+
+## Function Code
+### Function: Cycle A
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Cycle B
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Self loop
+\`\`\`js
+return msg;
+\`\`\`
+
+## Redactions
+0 values redacted
+
+## Risk Findings
+- Circular dependency detected (high)
+- Self-loop detected: "Self loop" (high)
+- Command execution node: "Run command" (medium)
+- Dynamic code with external input: "Render template" (medium)
+- No catch node in flow "Risk Triggers" (medium)"
+`;
+
+exports[`Determinism harness > matches snapshot for risk-triggers.json 4`] = `
+"{
+  "findingCount": 5,
+  "findings": [
+    {
+      "affectedNodes": [
+        {
+          "id": "cycle-a",
+          "name": "Cycle A"
+        },
+        {
+          "id": "cycle-b",
+          "name": "Cycle B"
+        }
+      ],
+      "confidence": "medium",
+      "description": "A cycle exists in the flow without a delay node. Nodes: Cycle A -> Cycle B.",
+      "evidence": "Cycle found: cycle-a -> cycle-b -> cycle-a (no delay)",
+      "id": "RISK_INFINITE_LOOP",
+      "remediation": "Add a delay node in the loop or verify this is intentional.",
+      "severity": "high",
+      "title": "Circular dependency detected"
+    },
+    {
+      "affectedNodes": [
+        {
+          "id": "self-loop",
+          "name": "Self loop"
+        }
+      ],
+      "confidence": "medium",
+      "description": "Node \\"Self loop\\" wires directly back to itself without a delay.",
+      "evidence": "Cycle found: self-loop -> self-loop (no delay)",
+      "id": "RISK_INFINITE_LOOP",
+      "remediation": "Add a delay node in the loop or verify this is intentional.",
+      "severity": "high",
+      "title": "Self-loop detected: \\"Self loop\\""
+    },
+    {
+      "affectedNodes": [
+        {
+          "id": "exec-node",
+          "name": "Run command"
+        }
+      ],
+      "confidence": "low",
+      "description": "Node \\"Run command\\" (exec) executes system commands, which can be dangerous if inputs are not sanitized.",
+      "evidence": "Node type \\"exec\\" can execute arbitrary commands",
+      "id": "RISK_INJECTION_PRONE",
+      "remediation": "Validate and sanitize all inputs before passing to exec nodes. Consider using allowlists for command parameters.",
+      "severity": "medium",
+      "title": "Command execution node: \\"Run command\\""
+    },
+    {
+      "affectedNodes": [
+        {
+          "id": "http-in",
+          "name": "Incoming request"
+        },
+        {
+          "id": "template-node",
+          "name": "Render template"
+        }
+      ],
+      "confidence": "low",
+      "description": "Node \\"Render template\\" (template) evaluates dynamic content and receives input from an external source.",
+      "evidence": "Incoming request -> Render template. template node connected to external input",
+      "id": "RISK_INJECTION_PRONE",
+      "remediation": "Validate and sanitize external inputs before using in function or template nodes. Avoid eval() patterns.",
+      "severity": "medium",
+      "title": "Dynamic code with external input: \\"Render template\\""
+    },
+    {
+      "affectedNodes": [
+        {
+          "id": "exec-node",
+          "name": "Run command"
+        },
+        {
+          "id": "http-response",
+          "name": "Send response"
+        }
+      ],
+      "confidence": "high",
+      "description": "Flow \\"Risk Triggers\\" contains 2 output node(s) but no catch node to handle errors.",
+      "evidence": "Tab \\"Risk Triggers\\" has 2 output node(s) and no catch node. Output types: exec, http response",
+      "id": "RISK_NO_CATCH",
+      "remediation": "Add a catch node to handle errors. Connect it to a debug node or error handler.",
+      "severity": "medium",
+      "title": "No catch node in flow \\"Risk Triggers\\""
+    }
+  ],
+  "metadata": {
+    "rulesRun": [
+      "RISK_NO_CATCH",
+      "RISK_INFINITE_LOOP",
+      "RISK_HIGH_ENTROPY",
+      "RISK_INJECTION_PRONE"
+    ]
+  },
+  "version": "1.0"
+}"
+`;
+
+exports[`Determinism harness > matches snapshot for secrets-entropy.json 1`] = `
+"{
+  "ioSurface": {
+    "inputs": [
+      {
+        "name": "Start",
+        "nodeId": "inject-secrets",
+        "type": "inject"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "Inspect",
+        "nodeId": "debug-secrets",
+        "type": "debug"
+      }
+    ]
+  },
+  "nodeTypes": [
+    {
+      "category": "logic",
+      "count": 1,
+      "type": "comment"
+    },
+    {
+      "category": "output",
+      "count": 1,
+      "type": "debug"
+    },
+    {
+      "category": "logic",
+      "count": 1,
+      "type": "function"
+    },
+    {
+      "category": "input",
+      "count": 1,
+      "type": "inject"
+    }
+  ],
+  "subflows": [],
+  "summary": {
+    "configNodeCount": 0,
+    "edgeCount": 2,
+    "nodeCount": 4,
+    "subflowCount": 0,
+    "tabCount": 1
+  },
+  "tabs": [
+    {
+      "categories": {
+        "config": 0,
+        "input": 1,
+        "logic": 2,
+        "output": 1,
+        "subflow": 0
+      },
+      "id": "tab-secrets",
+      "name": "Secrets & Entropy",
+      "nodeCount": 4
+    }
+  ],
+  "version": "1.0"
+}"
+`;
+
+exports[`Determinism harness > matches snapshot for secrets-entropy.json 2`] = `
+"{
+  "metadata": {
+    "analyzedNodes": 2,
+    "totalNodes": 4,
+    "uncertainCount": 1
+  },
+  "resources": [
+    {
+      "confidence": "high",
+      "description": "Scheduled or manual trigger",
+      "inferred": false,
+      "name": "Scheduled/manual trigger",
+      "nodeId": "inject-secrets",
+      "nodeName": "Start",
+      "type": "resource"
+    }
+  ],
+  "tools": [
+    {
+      "confidence": "medium",
+      "description": "Emit debug output",
+      "inferred": true,
+      "name": "Debug output",
+      "nodeId": "debug-secrets",
+      "nodeName": "Inspect",
+      "type": "tool"
+    }
+  ],
+  "version": "1.0"
+}"
+`;
+
+exports[`Determinism harness > matches snapshot for secrets-entropy.json 3`] = `
+"# Flow Context
+
+## Summary
+- 1 tabs, 4 nodes, 0 subflows
+- Token estimate: ~142 (budget: 8000)
+- Token status: ok
+
+## I/O Surface
+### Inputs
+- inject (Start)
+
+### Outputs
+- debug (Inspect)
+
+## Capabilities Summary
+- **Tools (actions)**: 1
+- **Resources (data sources)**: 1
+
+## Flow Structure
+### Tab: Secrets & Entropy
+- comment (Fixture: secrets-entropy.json - high entropy + false positives)
+- debug (Inspect)
+- function (Handle secrets)
+- inject (Start)
+
+## Function Code
+### Function: Handle secrets
+\`\`\`js
+msg.password = 'p@ssw0rd';
+msg.apiKey = 'sk_test_51NFAKE99999999999999999999999';
+msg.token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9';
+msg.falsePositive = 'VGhpcyBpcyBqdXN0IGJhc2U2NCB0ZXh0';
+return msg;
+\`\`\`
+
+## Redactions
+0 values redacted
+
+## Risk Findings
+- Potential secret in "Handle secrets" (medium)
+- Potential secret in "Handle secrets" (medium)
+- Potential secret in "Handle secrets" (medium)
+- No catch node in flow "Secrets & Entropy" (medium)"
+`;
+
+exports[`Determinism harness > matches snapshot for secrets-entropy.json 4`] = `
+"{
+  "findingCount": 4,
+  "findings": [
+    {
+      "affectedNodes": [
+        {
+          "id": "function-secrets",
+          "name": "Handle secrets"
+        }
+      ],
+      "confidence": "medium",
+      "description": "High-entropy string found in field \\"raw.password\\" that may be a hardcoded secret.",
+      "evidence": "Entropy: 2.95 (threshold 4.5), Field: raw.password, Length: 9 chars",
+      "id": "RISK_HIGH_ENTROPY",
+      "remediation": "Move secrets to environment variables or a secure credential store. Never hardcode secrets in flows.",
+      "severity": "medium",
+      "title": "Potential secret in \\"Handle secrets\\""
+    },
+    {
+      "affectedNodes": [
+        {
+          "id": "function-secrets",
+          "name": "Handle secrets"
+        }
+      ],
+      "confidence": "medium",
+      "description": "High-entropy string found in field \\"raw.apiKey\\" that may be a hardcoded secret.",
+      "evidence": "Entropy: 2.95 (threshold 4.5), Field: raw.apiKey, Length: 9 chars",
+      "id": "RISK_HIGH_ENTROPY",
+      "remediation": "Move secrets to environment variables or a secure credential store. Never hardcode secrets in flows.",
+      "severity": "medium",
+      "title": "Potential secret in \\"Handle secrets\\""
+    },
+    {
+      "affectedNodes": [
+        {
+          "id": "function-secrets",
+          "name": "Handle secrets"
+        }
+      ],
+      "confidence": "medium",
+      "description": "High-entropy string found in field \\"raw.token\\" that may be a hardcoded secret.",
+      "evidence": "Entropy: 2.95 (threshold 4.5), Field: raw.token, Length: 9 chars",
+      "id": "RISK_HIGH_ENTROPY",
+      "remediation": "Move secrets to environment variables or a secure credential store. Never hardcode secrets in flows.",
+      "severity": "medium",
+      "title": "Potential secret in \\"Handle secrets\\""
+    },
+    {
+      "affectedNodes": [
+        {
+          "id": "debug-secrets",
+          "name": "Inspect"
+        }
+      ],
+      "confidence": "high",
+      "description": "Flow \\"Secrets & Entropy\\" contains 1 output node(s) but no catch node to handle errors.",
+      "evidence": "Tab \\"Secrets & Entropy\\" has 1 output node(s) and no catch node. Output types: debug",
+      "id": "RISK_NO_CATCH",
+      "remediation": "Add a catch node to handle errors. Connect it to a debug node or error handler.",
+      "severity": "medium",
+      "title": "No catch node in flow \\"Secrets & Entropy\\""
+    }
+  ],
+  "metadata": {
+    "rulesRun": [
+      "RISK_NO_CATCH",
+      "RISK_INFINITE_LOOP",
+      "RISK_HIGH_ENTROPY",
+      "RISK_INJECTION_PRONE"
+    ]
+  },
+  "version": "1.0"
+}"
+`;
+
+exports[`Determinism harness > matches snapshot for simple.json 1`] = `
+"{
+  "ioSurface": {
+    "inputs": [
+      {
+        "name": "Start",
+        "nodeId": "inject-simple",
+        "type": "inject"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "Log",
+        "nodeId": "debug-simple",
+        "type": "debug"
+      }
+    ]
+  },
+  "nodeTypes": [
+    {
+      "category": "logic",
+      "count": 1,
+      "type": "comment"
+    },
+    {
+      "category": "output",
+      "count": 1,
+      "type": "debug"
+    },
+    {
+      "category": "input",
+      "count": 1,
+      "type": "inject"
+    }
+  ],
+  "subflows": [],
+  "summary": {
+    "configNodeCount": 0,
+    "edgeCount": 1,
+    "nodeCount": 3,
+    "subflowCount": 0,
+    "tabCount": 1
+  },
+  "tabs": [
+    {
+      "categories": {
+        "config": 0,
+        "input": 1,
+        "logic": 1,
+        "output": 1,
+        "subflow": 0
+      },
+      "id": "tab-simple",
+      "name": "Simple Flow",
+      "nodeCount": 3
+    }
+  ],
+  "version": "1.0"
+}"
+`;
+
+exports[`Determinism harness > matches snapshot for simple.json 2`] = `
+"{
+  "metadata": {
+    "analyzedNodes": 2,
+    "totalNodes": 3,
+    "uncertainCount": 1
+  },
+  "resources": [
+    {
+      "confidence": "high",
+      "description": "Scheduled or manual trigger",
+      "inferred": false,
+      "name": "Scheduled/manual trigger",
+      "nodeId": "inject-simple",
+      "nodeName": "Start",
+      "type": "resource"
+    }
+  ],
+  "tools": [
+    {
+      "confidence": "medium",
+      "description": "Emit debug output",
+      "inferred": true,
+      "name": "Debug output",
+      "nodeId": "debug-simple",
+      "nodeName": "Log",
+      "type": "tool"
+    }
+  ],
+  "version": "1.0"
+}"
+`;
+
+exports[`Determinism harness > matches snapshot for simple.json 3`] = `
+"# Flow Context
+
+## Summary
+- 1 tabs, 3 nodes, 0 subflows
+- Token estimate: ~41 (budget: 8000)
+- Token status: ok
+
+## I/O Surface
+### Inputs
+- inject (Start)
+
+### Outputs
+- debug (Log)
+
+## Capabilities Summary
+- **Tools (actions)**: 1
+- **Resources (data sources)**: 1
+
+## Flow Structure
+### Tab: Simple Flow
+- comment (Fixture: simple.json - inject -> debug)
+- debug (Log)
+- inject (Start)
+
+## Function Code
+- None
+
+## Redactions
+0 values redacted
+
+## Risk Findings
+- No catch node in flow "Simple Flow" (medium)"
+`;
+
+exports[`Determinism harness > matches snapshot for simple.json 4`] = `
+"{
+  "findingCount": 1,
+  "findings": [
+    {
+      "affectedNodes": [
+        {
+          "id": "debug-simple",
+          "name": "Log"
+        }
+      ],
+      "confidence": "high",
+      "description": "Flow \\"Simple Flow\\" contains 1 output node(s) but no catch node to handle errors.",
+      "evidence": "Tab \\"Simple Flow\\" has 1 output node(s) and no catch node. Output types: debug",
+      "id": "RISK_NO_CATCH",
+      "remediation": "Add a catch node to handle errors. Connect it to a debug node or error handler.",
+      "severity": "medium",
+      "title": "No catch node in flow \\"Simple Flow\\""
+    }
+  ],
+  "metadata": {
+    "rulesRun": [
+      "RISK_NO_CATCH",
+      "RISK_INFINITE_LOOP",
+      "RISK_HIGH_ENTROPY",
+      "RISK_INJECTION_PRONE"
+    ]
+  },
+  "version": "1.0"
+}"
+`;
+
+exports[`Determinism harness > matches snapshot for with-subflows.json 1`] = `
+"{
+  "ioSurface": {
+    "inputs": [
+      {
+        "name": "Start",
+        "nodeId": "inject-subflow",
+        "type": "inject"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "Output",
+        "nodeId": "debug-subflow",
+        "type": "debug"
+      }
+    ]
+  },
+  "nodeTypes": [
+    {
+      "category": "logic",
+      "count": 1,
+      "type": "comment"
+    },
+    {
+      "category": "output",
+      "count": 1,
+      "type": "debug"
+    },
+    {
+      "category": "logic",
+      "count": 2,
+      "type": "function"
+    },
+    {
+      "category": "input",
+      "count": 1,
+      "type": "inject"
+    },
+    {
+      "category": "logic",
+      "count": 1,
+      "type": "subflow-boundary"
+    }
+  ],
+  "subflows": [
+    {
+      "id": "subflow-1",
+      "name": "Wrapper Subflow",
+      "nodeCount": 1,
+      "usageCount": 0
+    },
+    {
+      "id": "subflow-2",
+      "name": "Nested Subflow",
+      "nodeCount": 1,
+      "usageCount": 0
+    }
+  ],
+  "summary": {
+    "configNodeCount": 0,
+    "edgeCount": 2,
+    "nodeCount": 6,
+    "subflowCount": 2,
+    "tabCount": 1
+  },
+  "tabs": [
+    {
+      "categories": {
+        "config": 0,
+        "input": 1,
+        "logic": 2,
+        "output": 1,
+        "subflow": 0
+      },
+      "id": "tab-subflow",
+      "name": "Subflow Playground",
+      "nodeCount": 4
+    }
+  ],
+  "version": "1.0"
+}"
+`;
+
+exports[`Determinism harness > matches snapshot for with-subflows.json 2`] = `
+"{
+  "metadata": {
+    "analyzedNodes": 2,
+    "totalNodes": 6,
+    "uncertainCount": 1
+  },
+  "resources": [
+    {
+      "confidence": "high",
+      "description": "Scheduled or manual trigger",
+      "inferred": false,
+      "name": "Scheduled/manual trigger",
+      "nodeId": "inject-subflow",
+      "nodeName": "Start",
+      "type": "resource"
+    }
+  ],
+  "tools": [
+    {
+      "confidence": "medium",
+      "description": "Emit debug output",
+      "inferred": true,
+      "name": "Debug output",
+      "nodeId": "debug-subflow",
+      "nodeName": "Output",
+      "type": "tool"
+    }
+  ],
+  "version": "1.0"
+}"
+`;
+
+exports[`Determinism harness > matches snapshot for with-subflows.json 3`] = `
+"# Flow Context
+
+## Summary
+- 1 tabs, 6 nodes, 2 subflows
+- Token estimate: ~73 (budget: 8000)
+- Token status: ok
+
+## I/O Surface
+### Inputs
+- inject (Start)
+
+### Outputs
+- debug (Output)
+
+## Capabilities Summary
+- **Tools (actions)**: 1
+- **Resources (data sources)**: 1
+
+## Flow Structure
+### Tab: Subflow Playground
+- comment (Fixture: with-subflows.json - nested subflow expansion)
+- debug (Output)
+- inject (Start)
+- subflow-boundary (Nested subflow not expanded: Nested subflow instance)
+
+## Function Code
+### Function: Nested function
+\`\`\`js
+return msg;
+\`\`\`
+### Function: Nested function
+\`\`\`js
+return msg;
+\`\`\`
+
+## Redactions
+0 values redacted
+
+## Risk Findings
+- No catch node in flow "Subflow Playground" (medium)"
+`;
+
+exports[`Determinism harness > matches snapshot for with-subflows.json 4`] = `
+"{
+  "findingCount": 1,
+  "findings": [
+    {
+      "affectedNodes": [
+        {
+          "id": "debug-subflow",
+          "name": "Output"
+        }
+      ],
+      "confidence": "high",
+      "description": "Flow \\"Subflow Playground\\" contains 1 output node(s) but no catch node to handle errors.",
+      "evidence": "Tab \\"Subflow Playground\\" has 1 output node(s) and no catch node. Output types: debug",
+      "id": "RISK_NO_CATCH",
+      "remediation": "Add a catch node to handle errors. Connect it to a debug node or error handler.",
+      "severity": "medium",
+      "title": "No catch node in flow \\"Subflow Playground\\""
+    }
+  ],
+  "metadata": {
+    "rulesRun": [
+      "RISK_NO_CATCH",
+      "RISK_INFINITE_LOOP",
+      "RISK_HIGH_ENTROPY",
+      "RISK_INJECTION_PRONE"
+    ]
+  },
+  "version": "1.0"
+}"
+`;

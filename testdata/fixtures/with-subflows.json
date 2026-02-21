@@ -1,0 +1,101 @@
+[
+  {
+    "id": "tab-subflow",
+    "type": "tab",
+    "label": "Subflow Playground"
+  },
+  {
+    "id": "comment-subflow",
+    "type": "comment",
+    "z": "tab-subflow",
+    "name": "Fixture: with-subflows.json - nested subflow expansion",
+    "x": 150,
+    "y": 40
+  },
+  {
+    "id": "subflow-2",
+    "type": "subflow",
+    "name": "Nested Subflow",
+    "info": "Used to test depth limits",
+    "in": [
+      {
+        "x": 60,
+        "y": 40,
+        "wires": [{ "id": "sub2-work" }]
+      }
+    ],
+    "out": [
+      {
+        "x": 260,
+        "y": 40,
+        "wires": [{ "id": "sub2-work", "port": 0 }]
+      }
+    ]
+  },
+  {
+    "id": "sub2-work",
+    "type": "function",
+    "z": "subflow-2",
+    "name": "Nested function",
+    "func": "return msg;",
+    "x": 160,
+    "y": 40,
+    "wires": [[]]
+  },
+  {
+    "id": "subflow-1",
+    "type": "subflow",
+    "name": "Wrapper Subflow",
+    "info": "Contains an instance of subflow-2",
+    "in": [
+      {
+        "x": 60,
+        "y": 80,
+        "wires": [{ "id": "sub1-bridge" }]
+      }
+    ],
+    "out": [
+      {
+        "x": 260,
+        "y": 80,
+        "wires": [{ "id": "sub1-bridge", "port": 0 }]
+      }
+    ]
+  },
+  {
+    "id": "sub1-bridge",
+    "type": "subflow:subflow-2",
+    "z": "subflow-1",
+    "name": "Nested subflow instance",
+    "x": 160,
+    "y": 80,
+    "wires": [[]]
+  },
+  {
+    "id": "inject-subflow",
+    "type": "inject",
+    "z": "tab-subflow",
+    "name": "Start",
+    "x": 120,
+    "y": 160,
+    "wires": [["subflow-instance-1"]]
+  },
+  {
+    "id": "subflow-instance-1",
+    "type": "subflow:subflow-1",
+    "z": "tab-subflow",
+    "name": "Wrapper instance",
+    "x": 320,
+    "y": 160,
+    "wires": [["debug-subflow"]]
+  },
+  {
+    "id": "debug-subflow",
+    "type": "debug",
+    "z": "tab-subflow",
+    "name": "Output",
+    "x": 520,
+    "y": 160,
+    "wires": []
+  }
+]
