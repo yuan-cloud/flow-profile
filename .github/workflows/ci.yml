@@ -51,7 +51,8 @@ jobs:
         run: bun install --frozen-lockfile
 
       - name: Install Playwright Browsers
-        run: bunx playwright install --with-deps
+        working-directory: apps/web
+        run: node node_modules/@playwright/test/cli.js install --with-deps chromium
 
       - name: E2E Smoke Tests
         run: bun run --cwd apps/web test:e2e
