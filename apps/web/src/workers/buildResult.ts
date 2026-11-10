@@ -1,6 +1,20 @@
-import { categorizeFlow, detectRisksSimple, expandSubflows, parseFlow } from '@flow-profile/core';
+import {
+  categorizeFlow,
+  detectRisksSimple,
+  expandSubflows,
+  parseFlow,
+  type RedactionReport,
+  redactSecrets,
+} from '@flow-profile/core';
 
-import type { BuildResult } from '@/types/worker';
+import type { BuildOptions, BuildResult } from '@/types/worker';
+
+export const DEFAULT_BUILD_OPTIONS: BuildOptions = {
+  redactionEnabled: true,
+  strictMode: true,
+  entropyThreshold: 4.5,
+  flattenSubflows: true,
+};
 
 type ParsedFlow = ReturnType<typeof parseFlow>;
 type ExpandedFlow = ReturnType<typeof expandSubflows>;
@@ -45,16 +59,20 @@ const buildNodeLines = (parsed: ParsedFlow, tabLabels: Map<string, string>) => {
   });
 };
 
-export const buildResultFromParts = ({
+const buildResultFromParts = ({
   parsed,
   expanded,
   categorySummary,
   riskFindings,
+  parameters,
+  redactionReport,
 }: {
   parsed: ParsedFlow;
-  expanded: ExpandedFlow;
+  expanded: Pick<ExpandedFlow, 'nodes' | 'edges'>;
   categorySummary: CategorySummary;
   riskFindings: RiskFindings;
+  parameters: BuildOptions;
+  redactionReport: RedactionReport;
 }): BuildResult => {
   const summary = {
     tabCount: parsed.tabs.length,
@@ -72,7 +90,7 @@ export const buildResultFromParts = ({
   const subflowLabels = Object.fromEntries(
     parsed.subflowDefs.map((def) => [def.id, def.name ?? def.id]),
   );
-  const tokenEstimate = {
+  const tokenEstimate: BuildResult['tokenEstimate'] = {
     current: currentTokens,
     budget: 8000,
     status: currentTokens > 8000 ? 'over' : currentTokens > 6400 ? 'warning' : 'ok',
@@ -82,6 +100,8 @@ export const buildResultFromParts = ({
   };
 
   return {
+    parameters,
+    redactionReport,
     aboutMyFlows: {
       version: '0.1',
       summary,
@@ -109,10 +129,33 @@ export const buildResultFromParts = ({
   };
 };
 
-export const buildResultFromInput = (input: unknown): BuildResult => {
-  const parsed = parseFlow(input);
-  const expanded = expandSubflows(parsed);
+export const buildResultFromInput = (
+  input: unknown,
+  options: Partial<BuildOptions> = {},
+  onProgress: (phase: string, percent: number) => void = () => {},
+): BuildResult => {
+  const parameters = { ...DEFAULT_BUILD_OPTIONS, ...options };
+  onProgress('Redacting sensitive values...', 20);
+  const { redacted, report } = redactSecrets(input, {
+    enabled: parameters.redactionEnabled,
+    strictMode: parameters.strictMode,
+    entropyThreshold: parameters.entropyThreshold,
+  });
+  onProgress('Parsing flow structure...', 35);
+  const parsed = parseFlow(redacted);
+  onProgress('Expanding subflows...', 45);
+  const expanded = parameters.flattenSubflows ? expandSubflows(parsed) : parsed;
+  onProgress('Categorizing nodes...', 60);
   const categorySummary = categorizeFlow(parsed);
+  onProgress('Analyzing risks...', 75);
   const riskFindings = detectRisksSimple(parsed);
-  return buildResultFromParts({ parsed, expanded, categorySummary, riskFindings });
+  onProgress('Generating outputs...', 90);
+  return buildResultFromParts({
+    parsed,
+    expanded,
+    categorySummary,
+    riskFindings,
+    parameters,
+    redactionReport: report,
+  });
 };

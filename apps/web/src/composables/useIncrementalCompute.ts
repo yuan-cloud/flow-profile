@@ -116,7 +116,7 @@ export const useIncrementalCompute = (inputs: IncrementalInputs) => {
   const getNodeTokens = (nodeId: string): { tokens: number; line: string } => {
     const existing = nodeTokenCache.get(nodeId);
     const node = nodeIndex.get(nodeId);
-    const line = node ? `- ${formatNodeLine(node)}` : `- ${nodeId}`;
+    const line = node ? `- ${formatNodeLine(node)}` : '- Unknown node';
     if (existing !== undefined) {
       return { tokens: existing, line };
     }
@@ -228,7 +228,7 @@ export const useIncrementalCompute = (inputs: IncrementalInputs) => {
     const collapsedSection = buildLabelListSection(
       'Collapsed subflow list:',
       collapsedIds,
-      (id) => subflowLabels.get(id) ?? id,
+      (id) => subflowLabels.get(id) ?? 'Unknown subflow',
     );
     lines.push(...collapsedSection.lines);
     tokens += collapsedSection.tokens;
@@ -300,6 +300,10 @@ export const useIncrementalCompute = (inputs: IncrementalInputs) => {
     () => inputs.baseResult.value,
     (result) => {
       if (!result) {
+        debounced.cancel();
+        nodeIndex.clear();
+        nodeTokenCache.clear();
+        subflowLabels.clear();
         promptContext.value = '';
         previousPromptContext.value = null;
         tokenEstimate.value = null;
@@ -309,7 +313,7 @@ export const useIncrementalCompute = (inputs: IncrementalInputs) => {
       rebuildCaches(result);
       queueChange('base', []);
     },
-    { immediate: true },
+    { immediate: true, flush: 'sync' },
   );
 
   watch(

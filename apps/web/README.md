@@ -20,7 +20,9 @@ The web app consumes all three library packages:
 - **@flow-profile/ui** — Reusable Vue 3 components
 - **@flow-profile/ai** — Optional AI suggestion adapters
 
-Processing runs in a **Web Worker** to keep the UI responsive during large flow analysis.
+Processing runs in a **Web Worker** to keep the UI responsive during large flow analysis. The worker calls `buildResultFromInput`, which redacts decoded JSON before parsing or deriving any displayed/exported result. Both initial loads and rebuilds receive the selected privacy options and return the applied parameters and redaction report.
+
+Privacy changes immediately invalidate the old preview, diff history and export data. Obsolete workers are terminated and late replies ignored. Preview, clipboard, Markdown downloads and ZIP members use the current result; an in-flight ZIP is discarded if its source changes. See the [web guide](../../docs/web.md#privacy-and-current-limitations) for heuristic redaction limits and differences from the CLI.
 
 ### State Management
 

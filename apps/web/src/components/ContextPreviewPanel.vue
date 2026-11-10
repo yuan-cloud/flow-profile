@@ -122,14 +122,14 @@
 // biome-ignore lint/correctness/noUnusedImports: used in template.
 import { FileText } from 'lucide-vue-next';
 import { storeToRefs } from 'pinia';
-import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
+import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 
 import { useFlowStore } from '@/stores/flow';
 import { diffLines } from '@/utils/diff';
 import { copyText } from '@/utils/export';
 
 const flowStore = useFlowStore();
-const { promptContext, previousPromptContext, tokenEstimate, budgetStatus } =
+const { promptContext, previousPromptContext, tokenEstimate, budgetStatus, appState } =
   storeToRefs(flowStore);
 
 // biome-ignore lint/correctness/noUnusedVariables: used in template.
@@ -204,8 +204,18 @@ const closeMenu = () => {
   menuOpen.value = false;
 };
 
+watch(
+  appState,
+  () => {
+    closeMenu();
+    window.getSelection()?.removeAllRanges();
+  },
+  { flush: 'sync' },
+);
+
 // biome-ignore lint/correctness/noUnusedVariables: used in template.
 const copySelection = async () => {
+  if (appState.value !== 'parsed' || !promptContext.value) return;
   const selection = window.getSelection()?.toString() ?? '';
   if (!selection.trim()) return;
   await copyText(selection);
@@ -214,7 +224,7 @@ const copySelection = async () => {
 
 // biome-ignore lint/correctness/noUnusedVariables: used in template.
 const copyAll = async () => {
-  if (!promptContext.value) return;
+  if (appState.value !== 'parsed' || !promptContext.value) return;
   await copyText(promptContext.value);
   closeMenu();
 };

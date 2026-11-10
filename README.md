@@ -5,7 +5,7 @@
 [![Bun](https://img.shields.io/badge/Bun-1.1%2B-f9f1e1.svg)](https://bun.sh/)
 [![Build](https://github.com/yuan-cloud/flow-profile/actions/workflows/ci.yml/badge.svg)](https://github.com/yuan-cloud/flow-profile/actions/workflows/ci.yml)
 
-Deterministic, local-first context hygiene for flow-based automation exports. Flow Profile produces redacted, budgeted context bundles and an auditable UI that shows exactly what would be shared with an AI assistant or support engineer — without sending data off-machine.
+Flow Profile prepares context from Node-RED flow exports for review and sharing. The CLI and web app generate artifacts locally, with field-name and entropy-based redaction enabled by default. Review the outputs before sharing; heuristic redaction cannot identify every secret.
 
 ![Flow Profile web app](apps/web/docs/assets/screenshots/flow-summary.png)
 
@@ -13,7 +13,7 @@ Deterministic, local-first context hygiene for flow-based automation exports. Fl
 
 - Deterministic outputs reduce review drift and make troubleshooting repeatable.
 - Redaction-first processing lowers accidental data exposure risk before sharing.
-- CLI + web parity supports both CI pipelines and human audit workflows.
+- CLI and web share redaction rules and defaults; their summaries and capabilities differ (see [web limitations](docs/web.md#privacy-and-current-limitations)).
 
 ## Who it's for
 
@@ -25,10 +25,10 @@ Flow Profile is for teams operating flow-based automation exports who need deter
 
 ## Features
 
-- **Deterministic bundles** — identical input produces identical output, byte-for-byte
-- **Redaction-first pipeline** — secrets are stripped before any optional AI usage
+- **Deterministic bundles** — the same input, options and selections produce repeatable artifacts in each interface
+- **Redaction-first pipeline** — matching string values are masked before summaries and risk analysis
 - **Risk detection (SARIF)** — flags exec nodes, insecure HTTP endpoints, and other hazards
-- **Token budgeting** — enforces model limits with configurable strategies
+- **Token budgeting** — core/CLI budget strategies; the web token meter estimates size and warns when over budget
 - **Capability manifest** — machine-readable summary of what flows can do
 - **Subflow expansion** — inlines subflows for complete context
 - **Web UI** — auditable, drag-and-drop Vue 3 app
@@ -40,10 +40,10 @@ Flow Profile is for teams operating flow-based automation exports who need deter
 
 ## Security & Governance
 
-- **Local-first by default** — bundles are generated on-device with no required network calls.
-- **Redaction-first pipeline** — secrets are removed before any optional AI usage.
-- **Auditable outputs** — users can inspect exactly what is shared.
-- **Deterministic artifacts** — identical input yields identical outputs for repeatable review.
+- **Local processing** — loading flows, building bundles and copying context run in the browser. The web app loads Google Fonts; optional external AI adapters send data to the selected provider after opt-in.
+- **Redaction enabled by default** — string values in matching fields are masked. Strict mode also scans eligible high-entropy strings, including labels. Disabling redaction or strict mode can expose sensitive values.
+- **Review before sharing** — the prompt preview matches copied/downloaded Markdown. Review JSON artifacts separately; they also appear in the ZIP. Plain-language secrets, object keys and strings excluded by entropy heuristics may remain. See [limitations](docs/web.md#privacy-and-current-limitations).
+- **Settings changes invalidate prior output** — the web app clears old previews and diff history while rebuilding with the new privacy settings.
 
 ## Architecture
 
@@ -61,12 +61,13 @@ Flow Profile is for teams operating flow-based automation exports who need deter
 
 ```
 flows.json
+  → decode JSON
+  → redact       — mask matching string values (enabled by default)
   → parse        — schema-validated ingestion
   → categorize   — group nodes by purpose
   → expand       — inline subflows
-  → redact       — strip credentials & secrets
   → detect risks — flag security concerns
-  → budget       — fit to token limits
+  → budget       — CLI budget strategy / web estimate and warning
   → output       — generate bundle artifacts
 ```
 
@@ -80,7 +81,7 @@ flows.json
 ### Install
 
 ```bash
-git clone <repo-url>
+git clone https://github.com/yuan-cloud/flow-profile.git
 cd flow-profile
 bun install
 ```
@@ -112,6 +113,8 @@ bun run dev
 
 Open http://localhost:5173 and drag-drop a `flows.json` file.
 
+Review the Redaction Report and risk findings. Selecting an affected node adds its sanitized label to the prompt preview. Changing redaction, strict mode or the entropy threshold rebuilds the result. Copy/download uses the same current prompt text; the support ZIP also includes the JSON artifacts and a manifest recording the applied settings. See the [web workflow and limitations](docs/web.md).
+
 ## Demo GIFs
 
 ![Demo: command palette and processing flow](apps/web/docs/assets/gifs/demo-command-palette.gif)
@@ -138,7 +141,7 @@ On VPS hosts, `bun run build` is most reliable when run locally or in CI due to 
 | `bundle-manifest.json` | Deterministic content-addressed manifest |
 | `capability-manifest.json` | Machine-readable capability inventory |
 | `prompt-context.md` | Markdown context ready for assistant consumption |
-| `risk-findings.json` | Security risk findings in SARIF format |
+| `risk-findings.json` | JSON risk findings (CLI `lint --format sarif` provides SARIF separately) |
 | `support-bundle.zip` | All artifacts in a single distributable archive |
 
 ## Documentation

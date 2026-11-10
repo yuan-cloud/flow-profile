@@ -82,6 +82,8 @@ export const useFlowStore = defineStore('flow', () => {
   const aboutMyFlows = computed(() => buildResult.value?.aboutMyFlows ?? null);
   const riskFindings = computed(() => buildResult.value?.riskFindings ?? []);
   const capabilities = computed(() => buildResult.value?.capabilityManifest ?? null);
+  const redactionReport = computed(() => buildResult.value?.redactionReport.entries ?? []);
+  const buildParameters = computed(() => buildResult.value?.parameters ?? null);
 
   const incremental = useIncrementalCompute({
     baseResult: buildResult,
@@ -133,7 +135,7 @@ export const useFlowStore = defineStore('flow', () => {
   const debouncedRebuild = createDebounce(() => {
     if (!rawInput.value) return;
     appState.value = 'loading';
-    const payload: RebuildOptions = { rawJson: rawInput.value };
+    const payload: RebuildOptions = { rawJson: rawInput.value, ...rebuildOptionsSnapshot.value };
     processor.rebuild(payload);
   }, 300);
 
@@ -144,30 +146,42 @@ export const useFlowStore = defineStore('flow', () => {
     flattenSubflows: options.flattenSubflows,
   }));
 
+  const invalidateBuild = () => {
+    debouncedRebuild.cancel();
+    processor.reset();
+    buildResult.value = null;
+    errorMessage.value = null;
+    loadingProgress.value = null;
+    appState.value = 'loading';
+  };
+
   watch(
     () => rebuildOptionsSnapshot.value,
     () => {
       if (!rawInput.value) return;
+      invalidateBuild();
       debouncedRebuild.schedule();
     },
-    { deep: true },
+    { flush: 'sync' },
   );
 
   const loadFlow = async (jsonString: string) => {
+    invalidateBuild();
     rawInput.value = jsonString;
-    appState.value = 'loading';
-    errorMessage.value = null;
-    buildResult.value = null;
-    processor.process(jsonString);
+    selectedNodes.value = new Set();
+    excludedNodes.value = new Set();
+    collapsedSubtrees.value = new Set();
+    processor.process(jsonString, rebuildOptionsSnapshot.value);
   };
 
   const rebuildWithOptions = () => {
     if (!rawInput.value) return;
-    appState.value = 'loading';
-    processor.rebuild({ rawJson: rawInput.value });
+    invalidateBuild();
+    processor.rebuild({ rawJson: rawInput.value, ...rebuildOptionsSnapshot.value });
   };
 
   const cancelBuild = () => {
+    debouncedRebuild.cancel();
     processor.cancel();
     errorMessage.value = null;
     appState.value = buildResult.value ? 'parsed' : 'empty';
@@ -207,6 +221,8 @@ export const useFlowStore = defineStore('flow', () => {
   };
 
   return {
+    buildParameters,
+    redactionReport,
     aboutMyFlows,
     appState,
     budgetStatus,

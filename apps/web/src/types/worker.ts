@@ -1,4 +1,11 @@
-import type { RiskFinding } from '@flow-profile/core';
+import type { RedactionReport, RiskFinding } from '@flow-profile/core';
+
+export interface BuildOptions {
+  redactionEnabled: boolean;
+  strictMode: boolean;
+  entropyThreshold: number;
+  flattenSubflows: boolean;
+}
 
 export interface TokenBudget {
   current: number;
@@ -23,6 +30,8 @@ export interface ContextSections {
 }
 
 export interface BuildResult {
+  parameters: BuildOptions;
+  redactionReport: RedactionReport;
   aboutMyFlows: Record<string, unknown>;
   promptContext: string;
   riskFindings: RiskFinding[];
@@ -36,12 +45,12 @@ export interface WorkerProgress {
   percent: number;
 }
 
-export interface RebuildOptions {
+export interface RebuildOptions extends Partial<BuildOptions> {
   rawJson?: string;
 }
 
 export type WorkerRequest =
-  | { type: 'parse'; payload: string }
+  | { type: 'parse'; payload: string; options?: Partial<BuildOptions> }
   | { type: 'rebuild'; payload: RebuildOptions }
   | { type: 'cancel' };
 

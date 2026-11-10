@@ -36,6 +36,13 @@ vi.mock('vue', async (importOriginal) => {
 const { useFlowProcessor } = await import('@/composables/useFlowProcessor');
 
 const fakeBuildResult: BuildResult = {
+  parameters: {
+    redactionEnabled: true,
+    strictMode: true,
+    entropyThreshold: 4.5,
+    flattenSubflows: true,
+  },
+  redactionReport: { entries: [], totalRedacted: 0 },
   aboutMyFlows: { version: '0.1', summary: { nodeCount: 5 } },
   promptContext: '# Flow Profile Context\nNodes: 5',
   riskFindings: [],
@@ -82,6 +89,7 @@ describe('useFlowProcessor', () => {
     expect(mockPostMessage).toHaveBeenCalledWith({
       type: 'parse',
       payload: '{"nodes":[]}',
+      options: undefined,
     });
   });
 
@@ -133,17 +141,17 @@ describe('useFlowProcessor', () => {
     expect(isBusy.value).toBe(false);
   });
 
-  it('cancel() posts cancel message when busy', () => {
+  it('cancel() terminates the worker when busy', () => {
     const { cancel, process } = useFlowProcessor();
     process('{}');
     cancel();
-    expect(mockPostMessage).toHaveBeenCalledWith({ type: 'cancel' });
+    expect(mockTerminate).toHaveBeenCalledOnce();
   });
 
   it('cancel() does nothing when not busy', () => {
     const { cancel } = useFlowProcessor();
     cancel();
-    // Only the constructor's addEventListener was called, no postMessage
+    // Only the constructor ran; no message should be posted.
     expect(mockPostMessage).not.toHaveBeenCalled();
   });
 
@@ -170,5 +178,29 @@ describe('useFlowProcessor', () => {
       type: 'rebuild',
       payload: options,
     });
+  });
+
+  it.each([
+    'reset',
+    'cancel',
+    'rebuild',
+    'process',
+  ] as const)('ignores late replies after %s replaces an in-flight worker', (action) => {
+    const processor = useFlowProcessor();
+    processor.process('[]');
+    const obsoleteHandler = messageHandler;
+    if (!obsoleteHandler) throw new Error('Missing worker listener');
+    if (action === 'process') processor.process('[]', { redactionEnabled: true });
+    else if (action === 'rebuild') processor.rebuild({ rawJson: '[]', strictMode: true });
+    else processor[action]();
+    obsoleteHandler({
+      data: { type: 'result', payload: fakeBuildResult },
+    } as MessageEvent<WorkerResponse>);
+    obsoleteHandler({
+      data: { type: 'error', message: 'obsolete input' },
+    } as MessageEvent<WorkerResponse>);
+    expect(processor.result.value).toBeNull();
+    expect(processor.error.value).toBeNull();
+    expect(mockTerminate).toHaveBeenCalledOnce();
   });
 });

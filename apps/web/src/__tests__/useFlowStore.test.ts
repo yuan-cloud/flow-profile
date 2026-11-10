@@ -1,11 +1,16 @@
 import { createPinia, setActivePinia } from 'pinia';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { nextTick, shallowRef } from 'vue';
+
+import type { BuildResult } from '@/types/worker';
+import { buildResultFromInput } from '@/workers/buildResult';
 
 const mocks = vi.hoisted(() => ({
   mockProcess: vi.fn(),
   mockRebuild: vi.fn(),
   mockCancel: vi.fn(),
   mockProcessorReset: vi.fn(),
+  result: { value: null } as { value: BuildResult | null },
 }));
 
 vi.mock('@/composables/useFlowProcessor', () => ({
@@ -15,7 +20,7 @@ vi.mock('@/composables/useFlowProcessor', () => ({
     cancel: mocks.mockCancel,
     reset: mocks.mockProcessorReset,
     progress: { value: null },
-    result: { value: null },
+    result: mocks.result,
     error: { value: null },
     isBusy: { value: false },
   }),
@@ -34,10 +39,51 @@ import { useFlowStore } from '@/stores/flow';
 describe('useFlowStore', () => {
   beforeEach(() => {
     setActivePinia(createPinia());
+    mocks.result = shallowRef<BuildResult | null>(null);
     mocks.mockProcess.mockClear();
     mocks.mockRebuild.mockClear();
     mocks.mockCancel.mockClear();
     mocks.mockProcessorReset.mockClear();
+  });
+
+  afterEach(() => vi.useRealTimers());
+
+  it('invalidates artifacts synchronously and sends the latest privacy options after debounce', async () => {
+    vi.useFakeTimers();
+    const store = useFlowStore();
+    await store.loadFlow('[]');
+    mocks.result.value = buildResultFromInput([]);
+    await nextTick();
+    expect(store.appState).toBe('parsed');
+    expect(store.aboutMyFlows).not.toBeNull();
+    store.options.redactionEnabled = false;
+    expect(store.appState).toBe('loading');
+    expect(store.aboutMyFlows).toBeNull();
+    expect(store.buildParameters).toBeNull();
+    store.options.strictMode = false;
+    store.options.entropyThreshold = 6;
+    vi.runAllTimers();
+    expect(mocks.mockRebuild).toHaveBeenCalledExactlyOnceWith({
+      rawJson: '[]',
+      redactionEnabled: false,
+      strictMode: false,
+      entropyThreshold: 6,
+      flattenSubflows: true,
+    });
+  });
+
+  it('cancels pending option rebuilds without restoring older artifacts', async () => {
+    vi.useFakeTimers();
+    const store = useFlowStore();
+    await store.loadFlow('[]');
+    mocks.result.value = buildResultFromInput([]);
+    await nextTick();
+    store.options.strictMode = false;
+    store.cancelBuild();
+    vi.runAllTimers();
+    expect(mocks.mockRebuild).not.toHaveBeenCalled();
+    expect(store.aboutMyFlows).toBeNull();
+    expect(store.appState).toBe('empty');
   });
 
   // --- Initial state ---
@@ -116,7 +162,12 @@ describe('useFlowStore', () => {
     const store = useFlowStore();
     await store.loadFlow('{"nodes":[{"id":"n1"}]}');
 
-    expect(mocks.mockProcess).toHaveBeenCalledWith('{"nodes":[{"id":"n1"}]}');
+    expect(mocks.mockProcess).toHaveBeenCalledWith('{"nodes":[{"id":"n1"}]}', {
+      redactionEnabled: true,
+      strictMode: true,
+      entropyThreshold: 4.5,
+      flattenSubflows: true,
+    });
   });
 
   // --- cancelBuild ---
@@ -156,7 +207,13 @@ describe('useFlowStore', () => {
 
     store.rebuildWithOptions();
     expect(store.appState).toBe('loading');
-    expect(mocks.mockRebuild).toHaveBeenCalledWith({ rawJson: '{"test":true}' });
+    expect(mocks.mockRebuild).toHaveBeenCalledWith({
+      rawJson: '{"test":true}',
+      redactionEnabled: true,
+      strictMode: true,
+      entropyThreshold: 4.5,
+      flattenSubflows: true,
+    });
   });
 
   // --- Node manipulation ---
