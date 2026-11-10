@@ -4,7 +4,7 @@ Flow Profile is a prototype installed from source. Flow processing runs locally;
 
 ## Prerequisites
 
-- Bun >= 1.1.0
+- Bun 1.3.14 (pinned in CI and `packageManager`; older Bun 1.1 does not use this repository's text lockfile)
 - Node.js >= 20
 
 ## From source (recommended)
@@ -12,7 +12,7 @@ Flow Profile is a prototype installed from source. Flow processing runs locally;
 ```bash
 git clone https://github.com/yuan-cloud/flow-profile.git
 cd flow-profile
-bun install
+bun install --frozen-lockfile
 ```
 
 ### Build the CLI

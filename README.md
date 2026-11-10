@@ -2,7 +2,7 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Node: >=20](https://img.shields.io/badge/Node-%E2%89%A520-brightgreen.svg)](https://nodejs.org/)
-[![Bun](https://img.shields.io/badge/Bun-1.1%2B-f9f1e1.svg)](https://bun.sh/)
+[![Bun](https://img.shields.io/badge/Bun-1.3.14-f9f1e1.svg)](https://bun.sh/)
 [![Build](https://github.com/yuan-cloud/flow-profile/actions/workflows/ci.yml/badge.svg)](https://github.com/yuan-cloud/flow-profile/actions/workflows/ci.yml)
 
 Flow Profile prepares context from Node-RED flow exports for review and sharing. The CLI and web app generate artifacts locally, with field-name and entropy-based redaction enabled by default. Review the outputs before sharing; heuristic redaction cannot identify every secret.
@@ -76,14 +76,14 @@ flows.json
 ### Prerequisites
 
 - [Node.js](https://nodejs.org/) >= 20
-- [Bun](https://bun.sh/) >= 1.1
+- [Bun](https://bun.sh/) 1.3.14 (the version used in CI)
 
 ### Install
 
 ```bash
 git clone https://github.com/yuan-cloud/flow-profile.git
 cd flow-profile
-bun install
+bun install --frozen-lockfile
 ```
 
 ### CLI

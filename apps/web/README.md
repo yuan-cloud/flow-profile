@@ -6,7 +6,7 @@ Vue 3 Context Builder web application for Flow Profile. This is the primary user
 
 ```bash
 # From the repository root
-bun install
+bun install --frozen-lockfile
 bun run dev
 ```
 
