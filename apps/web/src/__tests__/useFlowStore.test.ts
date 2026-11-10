@@ -28,6 +28,7 @@ vi.mock('@/composables/useFlowProcessor', () => ({
 
 vi.mock('@/composables/useIncrementalCompute', () => ({
   useIncrementalCompute: () => ({
+    contextRevision: { value: 0 },
     promptContext: { value: '' },
     previousPromptContext: { value: null },
     tokenEstimate: { value: null },

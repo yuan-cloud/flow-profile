@@ -42,6 +42,28 @@ const DEFAULT_OPTIONS: Required<RedactionOptions> = {
   additionalPatterns: [],
 };
 
+// Match structural positions, not values: the same string in a label remains content.
+const FLOW_IDENTITY_PATH =
+  /^\[(\d+)\]\.(id|type|z|wires\[\d+\]\[\d+\]|(?:in|out)\[\d+\]\.wires\[\d+\]\.id)$/;
+
+function isFlowIdentity(input: unknown, path: string): boolean {
+  if (!Array.isArray(input)) return false;
+  const match = FLOW_IDENTITY_PATH.exec(path);
+  const field = match?.[2];
+  if (!match || !field) return false;
+  const element = input[Number(match[1])] as unknown;
+  if (!element || typeof element !== 'object' || Array.isArray(element)) return false;
+  const record = element as { id?: unknown; type?: unknown };
+  if (
+    !Object.hasOwn(record, 'id') ||
+    typeof record.id !== 'string' ||
+    !Object.hasOwn(record, 'type') ||
+    typeof record.type !== 'string'
+  )
+    return false;
+  return (!field.startsWith('in[') && !field.startsWith('out[')) || record.type === 'subflow';
+}
+
 export function redactSecrets<T>(input: T, options: RedactionOptions = {}): RedactionResult<T> {
   const resolved = { ...DEFAULT_OPTIONS, ...options };
 
@@ -90,7 +112,11 @@ function collectCandidates(
       return;
     }
 
-    if (options.strictMode && isHighEntropy(value, options.entropyThreshold)) {
+    if (
+      options.strictMode &&
+      !isFlowIdentity(input, path) &&
+      isHighEntropy(value, options.entropyThreshold)
+    ) {
       recordCandidate(path, value, 'entropy', calculateEntropy(value));
     }
   };
@@ -182,12 +208,13 @@ function applyRedaction(
     }
 
     if (value && typeof value === 'object') {
-      const result: Record<string, unknown> = {};
-      for (const key of Object.keys(value)) {
-        const nextPath = appendPath(path, key);
-        result[key] = visit((value as Record<string, unknown>)[key], nextPath);
-      }
-      return result;
+      // fromEntries defines own data properties, including JSON's literal __proto__ key.
+      return Object.fromEntries(
+        Object.keys(value).map((key) => [
+          key,
+          visit((value as Record<string, unknown>)[key], appendPath(path, key)),
+        ]),
+      );
     }
 
     return value;
@@ -227,11 +254,9 @@ function cloneValue<T>(value: T): T {
     return value.map((item) => cloneValue(item)) as T;
   }
   if (value && typeof value === 'object') {
-    const result: Record<string, unknown> = {};
-    for (const key of Object.keys(value as Record<string, unknown>)) {
-      result[key] = cloneValue((value as Record<string, unknown>)[key]);
-    }
-    return result as T;
+    return Object.fromEntries(
+      Object.keys(value).map((key) => [key, cloneValue((value as Record<string, unknown>)[key])]),
+    ) as T;
   }
   return value;
 }

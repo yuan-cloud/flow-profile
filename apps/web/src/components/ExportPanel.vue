@@ -129,7 +129,7 @@
       </div>
 
       <p v-if="!canExport" class="text-xs text-fp-text-muted">
-        Export becomes available once a flow has been parsed.
+        Export becomes available when the current context is ready.
       </p>
     </div>
   </section>
@@ -153,8 +153,15 @@ import {
 } from '@/utils/export';
 
 const flowStore = useFlowStore();
-const { aboutMyFlows, promptContext, riskFindings, capabilities, buildParameters, appState } =
-  storeToRefs(flowStore);
+const {
+  aboutMyFlows,
+  promptContext,
+  riskFindings,
+  capabilities,
+  buildParameters,
+  appState,
+  contextRevision,
+} = storeToRefs(flowStore);
 
 const statusMessage = ref('');
 const statusKind = ref<'success' | 'error'>('success');
@@ -244,12 +251,20 @@ const handleDownloadBundle = async () => {
   if (!canExport.value || !parameters) return;
   const source = aboutMyFlows.value;
   const context = promptContext.value;
+  const revision = contextRevision.value;
   isBundling.value = true;
   try {
     const zipBytes = await buildSupportBundleZip(getArtifacts(), parameters);
     // Hashing is asynchronous: settings, selection or input may have changed meanwhile.
-    if (!canExport.value || source !== aboutMyFlows.value || context !== promptContext.value)
+    if (
+      !canExport.value ||
+      revision !== contextRevision.value ||
+      source !== aboutMyFlows.value ||
+      context !== promptContext.value
+    ) {
+      setStatus('Context changed. Download the updated bundle.', 'error');
       return;
+    }
     downloadBytes(zipBytes, 'support-bundle.zip', 'application/zip');
     setStatus('Bundle downloaded', 'success');
   } catch (error) {

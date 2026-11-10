@@ -10,6 +10,19 @@ import { parseJsonSafe } from '@/utils/errorHandling';
 import { buildResultFromInput } from '@/workers/buildResult';
 
 describe('worker integration smoke test', () => {
+  it.each([
+    true,
+    false,
+  ])('does not promote __proto__ metadata into output with redaction=%s', (redactionEnabled) => {
+    // Parse the literal __proto__ key as data; malformed synthetic JSON must fail the test.
+    const input = JSON.parse(
+      '[{"id":"tab1","type":"tab","__proto__":{"label":"SYNTHETIC inherited tab"}},{"id":"n1","type":"http request","z":"tab1","x":0,"y":0,"__proto__":{"name":"SYNTHETIC inherited node"}}]',
+    );
+    const result = buildResultFromInput(input, { redactionEnabled });
+    expect(JSON.stringify(result)).not.toContain('SYNTHETIC inherited');
+    expect(result.contextSections?.nodeLines[0]?.label).toBe('http request');
+  });
+
   it('builds a result from a fixture flow without errors', () => {
     const fixturePath = resolve(__dirname, '../../../../testdata/fixtures/simple.json');
     const raw = readFileSync(fixturePath, 'utf-8');

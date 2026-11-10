@@ -47,11 +47,14 @@
               <FileText :size="20" :stroke-width="2" aria-hidden="true" />
             </div>
             <div>
-              <p class="text-sm font-medium text-slate-200">No context yet</p>
-              <p class="mt-2 text-sm text-fp-text-muted">
+              <p class="text-sm font-medium text-slate-200">{{ appState === 'parsed' ? 'Updating context' : 'No context yet' }}</p>
+              <p v-if="appState === 'parsed'" class="mt-2 text-sm text-fp-text-muted">
+                Refreshing the preview for the current selection and options.
+              </p>
+              <p v-else class="mt-2 text-sm text-fp-text-muted">
                 Load a flow to generate the preview. Once parsed, the prompt context will appear here.
               </p>
-              <p class="mt-2 text-xs text-emerald-200">
+              <p v-if="appState !== 'parsed'" class="mt-2 text-xs text-emerald-200">
                 Tip: drop a <span class="font-mono">flows.json</span> file to get started.
               </p>
             </div>
@@ -129,8 +132,14 @@ import { diffLines } from '@/utils/diff';
 import { copyText } from '@/utils/export';
 
 const flowStore = useFlowStore();
-const { promptContext, previousPromptContext, tokenEstimate, budgetStatus, appState } =
-  storeToRefs(flowStore);
+const {
+  promptContext,
+  previousPromptContext,
+  tokenEstimate,
+  budgetStatus,
+  appState,
+  contextRevision,
+} = storeToRefs(flowStore);
 
 // biome-ignore lint/correctness/noUnusedVariables: used in template.
 const diffMode = ref(false);
@@ -205,7 +214,7 @@ const closeMenu = () => {
 };
 
 watch(
-  appState,
+  [appState, contextRevision],
   () => {
     closeMenu();
     window.getSelection()?.removeAllRanges();

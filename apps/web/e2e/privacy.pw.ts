@@ -25,6 +25,100 @@ const download = async (page: Page, button: Locator) => {
   return readFile(path);
 };
 
+test('discards a ZIP when selection changes before its hashes finish', async ({ page }) => {
+  await page.goto('/');
+  await page.locator('input[type="file"]').setInputFiles({
+    name: 'synthetic-export-race.json',
+    mimeType: 'application/json',
+    buffer: Buffer.from(JSON.stringify(flow)),
+  });
+  const affected = page
+    .getByTestId('risk-findings-panel')
+    .locator('article')
+    .filter({ hasText: 'No catch node' })
+    .getByRole('button');
+  await expect(affected).toHaveCount(2);
+  await affected.nth(0).click();
+  const preview = page.getByTestId('context-preview-panel').locator('pre');
+  await expect(preview).toContainText('Selected nodes: 1');
+  await expect(page.getByText('Analysis complete', { exact: true })).toBeHidden();
+
+  // Hold real hashing and freeze the 120ms selection debounce to make the race deterministic.
+  await page.clock.install();
+  await page.clock.pauseAt(new Date(Date.now() + 1000));
+  await page.evaluate(() => {
+    const digest = crypto.subtle.digest.bind(crypto.subtle);
+    let release = () => {};
+    const gate = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    (window as unknown as { releasePrivacyHash: () => void }).releasePrivacyHash = () => {
+      crypto.subtle.digest = digest;
+      release();
+    };
+    crypto.subtle.digest = async (...args) => {
+      await gate;
+      return digest(...args);
+    };
+  });
+  const exports = page.getByTestId('export-panel');
+  const bundle = exports.getByRole('button', { name: /^Download support-bundle/ });
+  // DOM clicks target the real handlers without animation/scroll waits advancing the race.
+  await bundle.evaluate((button: HTMLButtonElement) => button.click());
+  await expect(bundle).toContainText('Generating...');
+  await affected.nth(1).evaluate((button: HTMLButtonElement) => button.click());
+  const pendingDownload = page.waitForEvent('download', { timeout: 1000 }).catch(() => null);
+  await page.evaluate(() => {
+    (window as unknown as { releasePrivacyHash: () => void }).releasePrivacyHash();
+  });
+  await expect(bundle).toContainText('Download all');
+  expect(await pendingDownload).toBeNull();
+  await expect(exports.getByTestId('copy-context-button')).toBeDisabled();
+  await expect(bundle).toBeDisabled();
+
+  await page.clock.runFor(121);
+  await expect(preview).toContainText('Selected nodes: 2');
+  await page.clock.resume();
+  const zip = unzipSync(await download(page, bundle));
+  expect(strFromU8(zip['prompt-context.md'])).toBe(await preview.innerText());
+});
+
+test('keeps prototype metadata out of output and expands redacted subflows', async ({ page }) => {
+  await page.goto('/');
+  const input = JSON.parse(`[
+    {"id":"tab1","type":"tab","__proto__":{"label":"SYNTHETIC inherited tab"}},
+    {"id":"fedcba9876543210","type":"subflow","name":"Safe subflow","in":[],"out":[]},
+    {"id":"a","type":"debug","z":"fedcba9876543210","x":0,"y":0},
+    {"id":"b","type":"debug","z":"fedcba9876543210","x":100,"y":0},
+    {"id":"instance","type":"subflow:fedcba9876543210","z":"tab1","x":200,"y":0},
+    {"id":"output","type":"http request","z":"tab1","x":300,"y":0,"__proto__":{"name":"SYNTHETIC inherited node"}}
+  ]`); // ubs:ignore — synthetic JSON tests literal __proto__ keys through the real worker.
+  await page.locator('input[type="file"]').setInputFiles({
+    name: 'synthetic-structure.json',
+    mimeType: 'application/json',
+    buffer: Buffer.from(JSON.stringify(input)),
+  });
+  const exports = page.getByTestId('export-panel');
+  await expect(exports.getByTestId('copy-context-button')).toBeEnabled();
+  const threshold = page.getByRole('spinbutton', { name: 'Entropy threshold' });
+  await threshold.fill('3.5');
+  await threshold.press('Enter');
+  await expect(exports.getByTestId('copy-context-button')).toBeEnabled();
+  const zip = unzipSync(
+    await download(page, exports.getByRole('button', { name: /^Download support-bundle/ })),
+  );
+  const about = JSON.parse(strFromU8(zip['about-my-flows.json'])); // ubs:ignore — invalid exported JSON must fail.
+  const manifest = JSON.parse(strFromU8(zip['bundle-manifest.json'])); // ubs:ignore — invalid exported JSON must fail.
+  expect(manifest.parameters.entropyThreshold).toBe(3.5);
+  expect(about.expandedNodeCount).toBe(5);
+  for (const bytes of Object.values(zip)) {
+    expect(strFromU8(bytes)).not.toContain('SYNTHETIC inherited');
+  }
+  expect(await page.getByTestId('risk-findings-panel').innerText()).not.toContain(
+    'SYNTHETIC inherited',
+  );
+});
+
 test('redacts preview, clipboard, individual downloads and every bundle member', async ({
   page,
   context,

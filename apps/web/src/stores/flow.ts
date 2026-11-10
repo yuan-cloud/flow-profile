@@ -221,6 +221,7 @@ export const useFlowStore = defineStore('flow', () => {
   };
 
   return {
+    contextRevision: incremental.contextRevision,
     buildParameters,
     redactionReport,
     aboutMyFlows,

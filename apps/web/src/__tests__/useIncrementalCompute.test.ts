@@ -56,6 +56,57 @@ describe('useIncrementalCompute', () => {
     vi.useRealTimers();
   });
 
+  it.each([
+    'selectedNodes',
+    'excludedNodes',
+    'collapsedSubtrees',
+  ] as const)('invalidates %s context before debounce', async (field) => {
+    vi.useFakeTimers();
+    const inputs = {
+      baseResult: ref(buildResult(2)),
+      selectedNodes: ref(new Set<string>()),
+      excludedNodes: ref(new Set<string>()),
+      collapsedSubtrees: ref(new Set<string>()),
+      includeFunctionCode: ref(false),
+      tokenBudget: ref(8000),
+    };
+    const incremental = useIncrementalCompute(inputs);
+    vi.runAllTimers();
+    const previous = incremental.promptContext.value;
+    inputs[field].value = new Set(['node-1']);
+    expect(incremental.promptContext.value).toBe('');
+    await nextTick();
+    vi.advanceTimersByTime(119);
+    expect(incremental.promptContext.value).toBe('');
+    vi.advanceTimersByTime(1);
+    expect(incremental.promptContext.value).not.toBe(previous);
+    expect(incremental.promptContext.value).not.toBe('');
+    expect(incremental.previousPromptContext.value).toBe(previous);
+  });
+
+  it('tracks in-place selection changes even when the context returns to its original text', () => {
+    vi.useFakeTimers();
+    const selectedNodes = ref(new Set(['node-1']));
+    const incremental = useIncrementalCompute({
+      baseResult: ref(buildResult(2)),
+      selectedNodes,
+      excludedNodes: ref(new Set()),
+      collapsedSubtrees: ref(new Set()),
+      includeFunctionCode: ref(false),
+      tokenBudget: ref(8000),
+    });
+    vi.runAllTimers();
+    const text = incremental.promptContext.value;
+    const revision = incremental.contextRevision.value;
+    selectedNodes.value.add('node-2');
+    expect(incremental.promptContext.value).toBe('');
+    expect(incremental.tokenEstimate.value).toBeNull();
+    selectedNodes.value.delete('node-2');
+    vi.runAllTimers();
+    expect(incremental.promptContext.value).toBe(text);
+    expect(incremental.contextRevision.value).toBeGreaterThan(revision);
+  });
+
   it('clears stale preview and diff history immediately on invalidation, including pending work', async () => {
     vi.useFakeTimers();
     const baseResult = ref<BuildResult | null>(buildResult(2));
