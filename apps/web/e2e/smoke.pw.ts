@@ -119,6 +119,9 @@ test('no critical or serious a11y violations', async ({ page }) => {
     await waitForWithLogging(contextPreview, 'Context Preview', { timeout: 30_000 });
 
     logPhase('Accessibility Audit');
+    await expect(page.getByTestId('copy-context-button')).toBeEnabled();
+    // Audit the settled workspace, not a frame in the completion banner's opacity transition.
+    await expect(page.getByText('Analysis complete', { exact: true })).toBeHidden();
     logStep('Running axe-core analysis');
     const results = await new AxeBuilder({ page })
       .withTags(['wcag2a', 'wcag2aa', 'wcag21aa'])

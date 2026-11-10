@@ -15,6 +15,8 @@ const flow = [
 ];
 
 const download = async (page: Page, button: Locator) => {
+  await button.scrollIntoViewIfNeeded();
+  await expect(button).toBeInViewport({ ratio: 1 });
   const pending = page.waitForEvent('download');
   await button.click();
   const file = await pending;

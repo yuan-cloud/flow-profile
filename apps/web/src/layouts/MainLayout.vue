@@ -635,6 +635,8 @@ onBeforeUnmount(() => {
 
 .main-layout__right {
   position: relative;
+  /* Keep export controls from collapsing into clipped, unclickable grid rows. */
+  grid-auto-rows: max-content;
 }
 
 .main-layout__sheet {
