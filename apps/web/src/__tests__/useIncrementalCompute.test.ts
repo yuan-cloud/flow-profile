@@ -26,6 +26,13 @@ const buildNodes = (count: number): ContextNodeLine[] =>
 const buildResult = (count: number): BuildResult => {
   const summaryLines = ['# Flow Profile Context', '', `Nodes: ${count}`];
   return {
+    parameters: {
+      redactionEnabled: true,
+      strictMode: true,
+      entropyThreshold: 4.5,
+      flattenSubflows: true,
+    },
+    redactionReport: { entries: [], totalRedacted: 0 },
     aboutMyFlows: {},
     promptContext: summaryLines.join('\n'),
     riskFindings: [],
@@ -47,6 +54,98 @@ const buildResult = (count: number): BuildResult => {
 describe('useIncrementalCompute', () => {
   afterEach(() => {
     vi.useRealTimers();
+  });
+
+  it.each([
+    'selectedNodes',
+    'excludedNodes',
+    'collapsedSubtrees',
+  ] as const)('invalidates %s context before debounce', async (field) => {
+    vi.useFakeTimers();
+    const inputs = {
+      baseResult: ref(buildResult(2)),
+      selectedNodes: ref(new Set<string>()),
+      excludedNodes: ref(new Set<string>()),
+      collapsedSubtrees: ref(new Set<string>()),
+      includeFunctionCode: ref(false),
+      tokenBudget: ref(8000),
+    };
+    const incremental = useIncrementalCompute(inputs);
+    vi.runAllTimers();
+    const previous = incremental.promptContext.value;
+    inputs[field].value = new Set(['node-1']);
+    expect(incremental.promptContext.value).toBe('');
+    await nextTick();
+    vi.advanceTimersByTime(119);
+    expect(incremental.promptContext.value).toBe('');
+    vi.advanceTimersByTime(1);
+    expect(incremental.promptContext.value).not.toBe(previous);
+    expect(incremental.promptContext.value).not.toBe('');
+    expect(incremental.previousPromptContext.value).toBe(previous);
+  });
+
+  it('tracks in-place selection changes even when the context returns to its original text', () => {
+    vi.useFakeTimers();
+    const selectedNodes = ref(new Set(['node-1']));
+    const incremental = useIncrementalCompute({
+      baseResult: ref(buildResult(2)),
+      selectedNodes,
+      excludedNodes: ref(new Set()),
+      collapsedSubtrees: ref(new Set()),
+      includeFunctionCode: ref(false),
+      tokenBudget: ref(8000),
+    });
+    vi.runAllTimers();
+    const text = incremental.promptContext.value;
+    const revision = incremental.contextRevision.value;
+    selectedNodes.value.add('node-2');
+    expect(incremental.promptContext.value).toBe('');
+    expect(incremental.tokenEstimate.value).toBeNull();
+    selectedNodes.value.delete('node-2');
+    vi.runAllTimers();
+    expect(incremental.promptContext.value).toBe(text);
+    expect(incremental.contextRevision.value).toBeGreaterThan(revision);
+  });
+
+  it('clears stale preview and diff history immediately on invalidation, including pending work', async () => {
+    vi.useFakeTimers();
+    const baseResult = ref<BuildResult | null>(buildResult(2));
+    const selectedNodes = ref(new Set(['node-1']));
+    const incremental = useIncrementalCompute({
+      baseResult,
+      selectedNodes,
+      excludedNodes: ref(new Set()),
+      collapsedSubtrees: ref(new Set()),
+      includeFunctionCode: ref(false),
+      tokenBudget: ref(8000),
+    });
+    vi.runAllTimers();
+    expect(incremental.promptContext.value).toContain('Node 1');
+    selectedNodes.value = new Set(['node-2']);
+    await nextTick();
+    baseResult.value = null;
+    expect(incremental.promptContext.value).toBe('');
+    expect(incremental.previousPromptContext.value).toBeNull();
+    vi.runAllTimers();
+    baseResult.value = buildResult(2);
+    vi.runAllTimers();
+    expect(incremental.promptContext.value).toContain('Node 2');
+    expect(incremental.previousPromptContext.value).toBeNull();
+  });
+
+  it('never emits unknown selection or subflow IDs as fallback labels', () => {
+    vi.useFakeTimers();
+    const secret = 'SYNTHETIC-stale-secret-id'; // ubs:ignore — synthetic privacy regression marker, not a credential.
+    const incremental = useIncrementalCompute({
+      baseResult: ref(buildResult(2)),
+      selectedNodes: ref(new Set([secret])),
+      excludedNodes: ref(new Set([secret])),
+      collapsedSubtrees: ref(new Set([secret])),
+      includeFunctionCode: ref(false),
+      tokenBudget: ref(8000),
+    });
+    vi.runAllTimers();
+    expect(incremental.promptContext.value).not.toContain(secret);
   });
 
   it('recomputes only affected nodes after single selection change', async () => {

@@ -9,8 +9,9 @@ const loadSampleFlow = async (page: Page) => {
 };
 
 const waitForFlowLoaded = async (page: Page) => {
-  const tokenMeter = page.locator('#controls-panel').getByTestId('token-meter');
-  await expect(tokenMeter).toBeVisible({ timeout: 30_000 });
+  // The token meter is visible during loading, before worker modules finish loading.
+  const copyButton = page.locator('#controls-panel').getByTestId('copy-context-button');
+  await expect(copyButton).toBeEnabled({ timeout: 30_000 });
 };
 
 const isLocalOrKnown = (hostname: string) =>

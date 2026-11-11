@@ -15,7 +15,7 @@
           </p>
           <div class="mt-3 inline-flex items-center gap-2 rounded-fp-full border border-emerald-500/[var(--fp-opacity-default)] bg-emerald-500/[var(--fp-opacity-subtle)] px-3 py-1 text-xs text-emerald-100">
             <Lock :size="14" :stroke-width="2" class="shrink-0" aria-hidden="true" />
-            Privacy-first export
+            {{ buildParameters?.redactionEnabled ? 'Redaction enabled — review before sharing' : 'Redaction disabled — output may contain secrets' }}
           </div>
         </div>
         <Transition
@@ -129,7 +129,7 @@
       </div>
 
       <p v-if="!canExport" class="text-xs text-fp-text-muted">
-        Export becomes available once a flow has been parsed.
+        Export becomes available when the current context is ready.
       </p>
     </div>
   </section>
@@ -153,7 +153,15 @@ import {
 } from '@/utils/export';
 
 const flowStore = useFlowStore();
-const { aboutMyFlows, promptContext, riskFindings, capabilities, options } = storeToRefs(flowStore);
+const {
+  aboutMyFlows,
+  promptContext,
+  riskFindings,
+  capabilities,
+  buildParameters,
+  appState,
+  contextRevision,
+} = storeToRefs(flowStore);
 
 const statusMessage = ref('');
 const statusKind = ref<'success' | 'error'>('success');
@@ -167,7 +175,14 @@ const { announce } = useAnnounce();
 // biome-ignore lint/correctness/noUnusedVariables: used in template.
 const { shortcuts, formatShortcut } = useShortcuts();
 
-const canExport = computed(() => Boolean(aboutMyFlows.value && promptContext.value));
+const canExport = computed(() =>
+  Boolean(
+    appState.value === 'parsed' &&
+      buildParameters.value &&
+      aboutMyFlows.value &&
+      promptContext.value,
+  ),
+);
 
 // biome-ignore lint/correctness/noUnusedVariables: used in template.
 const statusClass = computed(() => {
@@ -175,13 +190,6 @@ const statusClass = computed(() => {
     ? 'border-emerald-400/[var(--fp-opacity-default)] bg-emerald-500/[var(--fp-opacity-subtle)] text-emerald-100'
     : 'border-rose-400/[var(--fp-opacity-default)] bg-rose-500/[var(--fp-opacity-subtle)] text-rose-100';
 });
-
-const parameters = computed(() => ({
-  redactionEnabled: options.value.redactionEnabled,
-  strictMode: options.value.strictMode,
-  entropyThreshold: options.value.entropyThreshold,
-  flattenSubflows: options.value.flattenSubflows,
-}));
 
 // biome-ignore lint/correctness/noUnusedVariables: used in template.
 const individualFiles = computed(() => [
@@ -217,7 +225,7 @@ const getArtifacts = () => ({
 });
 
 const handleCopyContext = async () => {
-  if (!promptContext.value) return;
+  if (!canExport.value) return;
   isCopying.value = true;
   const success = await copyText(promptContext.value);
   isCopying.value = false;
@@ -233,16 +241,30 @@ const handleCopyContext = async () => {
 };
 
 const handleDownloadContext = () => {
-  if (!promptContext.value) return;
+  if (!canExport.value) return;
   downloadText(promptContext.value, 'prompt-context.md', 'text/markdown');
   setStatus('Context downloaded', 'success');
 };
 
 const handleDownloadBundle = async () => {
-  if (!canExport.value) return;
+  const parameters = buildParameters.value;
+  if (!canExport.value || !parameters) return;
+  const source = aboutMyFlows.value;
+  const context = promptContext.value;
+  const revision = contextRevision.value;
   isBundling.value = true;
   try {
-    const zipBytes = await buildSupportBundleZip(getArtifacts(), parameters.value);
+    const zipBytes = await buildSupportBundleZip(getArtifacts(), parameters);
+    // Hashing is asynchronous: settings, selection or input may have changed meanwhile.
+    if (
+      !canExport.value ||
+      revision !== contextRevision.value ||
+      source !== aboutMyFlows.value ||
+      context !== promptContext.value
+    ) {
+      setStatus('Context changed. Download the updated bundle.', 'error');
+      return;
+    }
     downloadBytes(zipBytes, 'support-bundle.zip', 'application/zip');
     setStatus('Bundle downloaded', 'success');
   } catch (error) {
@@ -255,6 +277,7 @@ const handleDownloadBundle = async () => {
 
 // biome-ignore lint/correctness/noUnusedVariables: used in template.
 const downloadIndividual = (name: string) => {
+  if (!canExport.value) return;
   const artifacts = exportArtifacts(getArtifacts());
   const file = artifacts.find((entry) => entry.name === name);
   if (!file) return;

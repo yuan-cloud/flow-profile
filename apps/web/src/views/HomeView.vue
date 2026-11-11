@@ -272,7 +272,7 @@ const tokenBreakdown = computed(() => ({
 }));
 
 // biome-ignore lint/correctness/noUnusedVariables: used in template.
-const redactionReport = computed(() => []);
+const redactionReport = flowRefs.redactionReport;
 // biome-ignore lint/correctness/noUnusedVariables: used in template.
 const capabilityCount = computed(() => {
   const manifest = capabilities.value as { tools?: unknown[]; resources?: unknown[] } | null;

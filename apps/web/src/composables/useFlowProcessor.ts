@@ -1,16 +1,18 @@
 import { onUnmounted, ref, shallowRef } from 'vue';
 
-import type { BuildResult, RebuildOptions, WorkerProgress, WorkerResponse } from '@/types/worker';
+import type {
+  BuildOptions,
+  BuildResult,
+  RebuildOptions,
+  WorkerProgress,
+  WorkerResponse,
+} from '@/types/worker';
 
 export const useFlowProcessor = () => {
   const progress = ref<WorkerProgress | null>(null);
   const result = shallowRef<BuildResult | null>(null);
   const error = ref<string | null>(null);
   const isBusy = ref(false);
-
-  const worker = new Worker(new URL('../workers/processor.worker.ts', import.meta.url), {
-    type: 'module',
-  });
 
   const handleMessage = (event: MessageEvent<WorkerResponse>) => {
     const message = event.data;
@@ -41,19 +43,43 @@ export const useFlowProcessor = () => {
     }
   };
 
-  worker.addEventListener('message', handleMessage);
+  let disposeWorker: () => void;
+  const createWorker = () => {
+    const source = new Worker(new URL('../workers/processor.worker.ts', import.meta.url), {
+      type: 'module',
+    });
+    const listener = (event: MessageEvent<WorkerResponse>) => {
+      // A terminated worker may already have queued a reply. Ignore obsolete results.
+      if (source === worker) handleMessage(event);
+    };
+    source.addEventListener('message', listener);
+    disposeWorker = () => {
+      source.removeEventListener('message', listener);
+      source.terminate();
+    };
+    return source;
+  };
+  let worker = createWorker();
 
-  const process = (rawJson: string) => {
+  const replaceWorker = () => {
+    disposeWorker();
+    worker = createWorker();
+  };
+
+  const process = (rawJson: string, options?: Partial<BuildOptions>) => {
+    if (isBusy.value) replaceWorker();
     error.value = null;
     result.value = null;
     progress.value = { phase: 'Queued', percent: 0 };
     isBusy.value = true;
 
-    worker.postMessage({ type: 'parse', payload: rawJson });
+    worker.postMessage({ type: 'parse', payload: rawJson, options });
   };
 
   const rebuild = (options: RebuildOptions) => {
+    if (isBusy.value) replaceWorker();
     error.value = null;
+    result.value = null;
     progress.value = { phase: 'Rebuilding', percent: 0 };
     isBusy.value = true;
 
@@ -62,10 +88,14 @@ export const useFlowProcessor = () => {
 
   const cancel = () => {
     if (!isBusy.value) return;
-    worker.postMessage({ type: 'cancel' });
+    replaceWorker();
+    result.value = null;
+    progress.value = null;
+    isBusy.value = false;
   };
 
   const reset = () => {
+    replaceWorker();
     progress.value = null;
     result.value = null;
     error.value = null;
@@ -73,8 +103,7 @@ export const useFlowProcessor = () => {
   };
 
   onUnmounted(() => {
-    worker.removeEventListener('message', handleMessage);
-    worker.terminate();
+    disposeWorker();
   });
 
   return {

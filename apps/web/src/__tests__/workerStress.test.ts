@@ -1,11 +1,10 @@
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 
-import { categorizeFlow, expandSubflows, parseFlow } from '@flow-profile/core';
 import { describe, expect, it } from 'vitest';
 
 import { parseJsonSafe } from '@/utils/errorHandling';
-import { buildResultFromInput, buildResultFromParts } from '@/workers/buildResult';
+import { buildResultFromInput } from '@/workers/buildResult';
 
 const FIXTURES_DIR = resolve(__dirname, '../../../../testdata/fixtures');
 
@@ -156,21 +155,35 @@ describe('Worker stress and recovery', () => {
       const labels = result.contextSections.subflowLabels;
       expect(Object.keys(labels).length).toBeGreaterThan(0);
     });
+
+    it('honors the subflow expansion option recorded in the manifest', () => {
+      const input = [
+        { id: 'tab1', type: 'tab', label: 'Main' },
+        { id: 'sf1', type: 'subflow', name: 'Reusable', in: [], out: [] },
+        { id: 'a', type: 'debug', z: 'sf1', x: 0, y: 0, wires: [] },
+        { id: 'b', type: 'debug', z: 'sf1', x: 0, y: 0, wires: [] },
+        { id: 'i1', type: 'subflow:sf1', z: 'tab1', x: 0, y: 0, wires: [] },
+        { id: 'i2', type: 'subflow:sf1', z: 'tab1', x: 0, y: 0, wires: [] },
+        { id: 'i3', type: 'subflow:sf1', z: 'tab1', x: 0, y: 0, wires: [] },
+      ];
+      const expanded = buildResultFromInput(input);
+      const unexpanded = buildResultFromInput(input, { flattenSubflows: false });
+      expect(expanded.parameters.flattenSubflows).toBe(true);
+      expect(unexpanded.parameters.flattenSubflows).toBe(false);
+      expect(expanded.aboutMyFlows['expandedNodeCount']).toBeGreaterThan(
+        unexpanded.aboutMyFlows['expandedNodeCount'] as number,
+      );
+    });
   });
 
-  describe('buildResultFromParts edge cases', () => {
+  describe('buildResultFromInput edge cases', () => {
     it('handles parsed flow with no edges', () => {
       const input = [
         { id: 'tab1', type: 'tab', label: 'No Edges' },
         { id: 'n1', type: 'inject', z: 'tab1', x: 0, y: 0, wires: [] },
       ];
 
-      const parsed = parseFlow(input);
-      const expanded = expandSubflows(parsed);
-      const categorySummary = categorizeFlow(parsed);
-      const riskFindings: never[] = [];
-
-      const result = buildResultFromParts({ parsed, expanded, categorySummary, riskFindings });
+      const result = buildResultFromInput(input);
 
       expect(result.aboutMyFlows.summary.edgeCount).toBe(0);
       expect(result.aboutMyFlows.summary.nodeCount).toBe(1);

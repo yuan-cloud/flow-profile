@@ -1,5 +1,5 @@
 import type { Ref } from 'vue';
-import { ref, watch } from 'vue';
+import { computed, ref, watch } from 'vue';
 
 import type { BuildResult, ContextNodeLine, TokenBudget } from '@/types/worker';
 
@@ -81,6 +81,8 @@ export const useIncrementalCompute = (inputs: IncrementalInputs) => {
   const promptContext = ref('');
   const previousPromptContext = ref<string | null>(null);
   const tokenEstimate = ref<TokenBudget | null>(null);
+  const contextPending = ref(false);
+  const contextRevision = ref(0);
 
   const nodeIndex = new Map<string, ContextNodeLine>();
   const nodeTokenCache = new Map<string, number>();
@@ -116,7 +118,7 @@ export const useIncrementalCompute = (inputs: IncrementalInputs) => {
   const getNodeTokens = (nodeId: string): { tokens: number; line: string } => {
     const existing = nodeTokenCache.get(nodeId);
     const node = nodeIndex.get(nodeId);
-    const line = node ? `- ${formatNodeLine(node)}` : `- ${nodeId}`;
+    const line = node ? `- ${formatNodeLine(node)}` : '- Unknown node';
     if (existing !== undefined) {
       return { tokens: existing, line };
     }
@@ -228,7 +230,7 @@ export const useIncrementalCompute = (inputs: IncrementalInputs) => {
     const collapsedSection = buildLabelListSection(
       'Collapsed subflow list:',
       collapsedIds,
-      (id) => subflowLabels.get(id) ?? id,
+      (id) => subflowLabels.get(id) ?? 'Unknown subflow',
     );
     lines.push(...collapsedSection.lines);
     tokens += collapsedSection.tokens;
@@ -244,6 +246,7 @@ export const useIncrementalCompute = (inputs: IncrementalInputs) => {
       previousPromptContext.value = null;
       tokenEstimate.value = null;
       pendingNodes.clear();
+      contextPending.value = false;
       return;
     }
 
@@ -284,11 +287,14 @@ export const useIncrementalCompute = (inputs: IncrementalInputs) => {
     });
 
     pendingNodes.clear();
+    contextPending.value = false;
   };
 
   const debounced = createDebounce(processChanges, inputs.debounceMs ?? 120);
 
   const queueChange = (reason: RecomputeReason, affectedNodes: string[]) => {
+    contextPending.value = true;
+    contextRevision.value += 1;
     pendingReason = reason;
     for (const id of affectedNodes) {
       pendingNodes.add(id);
@@ -300,43 +306,52 @@ export const useIncrementalCompute = (inputs: IncrementalInputs) => {
     () => inputs.baseResult.value,
     (result) => {
       if (!result) {
+        debounced.cancel();
+        nodeIndex.clear();
+        nodeTokenCache.clear();
+        subflowLabels.clear();
         promptContext.value = '';
         previousPromptContext.value = null;
         tokenEstimate.value = null;
         pendingNodes.clear();
+        contextPending.value = false;
+        contextRevision.value += 1;
         return;
       }
       rebuildCaches(result);
       queueChange('base', []);
     },
-    { immediate: true },
+    { immediate: true, flush: 'sync' },
   );
 
   watch(
-    () => inputs.selectedNodes.value,
+    () => new Set(inputs.selectedNodes.value),
     (next, prev) => {
       const affected = diffSet(prev, next);
       if (affected.length === 0) return;
       queueChange('selection', affected);
     },
+    { flush: 'sync' },
   );
 
   watch(
-    () => inputs.excludedNodes.value,
+    () => new Set(inputs.excludedNodes.value),
     (next, prev) => {
       const affected = diffSet(prev, next);
       if (affected.length === 0) return;
       queueChange('exclusion', affected);
     },
+    { flush: 'sync' },
   );
 
   watch(
-    () => inputs.collapsedSubtrees.value,
+    () => new Set(inputs.collapsedSubtrees.value),
     (next, prev) => {
       const affected = diffSet(prev, next);
       if (affected.length === 0) return;
       queueChange('collapse', affected);
     },
+    { flush: 'sync' },
   );
 
   watch(
@@ -344,6 +359,7 @@ export const useIncrementalCompute = (inputs: IncrementalInputs) => {
     () => {
       queueChange('budget', []);
     },
+    { flush: 'sync' },
   );
 
   watch(
@@ -351,11 +367,13 @@ export const useIncrementalCompute = (inputs: IncrementalInputs) => {
     () => {
       queueChange('functionCode', []);
     },
+    { flush: 'sync' },
   );
 
   return {
-    promptContext,
+    contextRevision,
+    promptContext: computed(() => (contextPending.value ? '' : promptContext.value)),
     previousPromptContext,
-    tokenEstimate,
+    tokenEstimate: computed(() => (contextPending.value ? null : tokenEstimate.value)),
   };
 };
