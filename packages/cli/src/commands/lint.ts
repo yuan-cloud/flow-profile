@@ -10,6 +10,7 @@ import {
 } from '@flow-profile/core';
 
 import { type LintConfig, type LintRuleLevel, loadLintConfig } from '../config/load.js';
+import { createLintPrivacy, markLintFinding, safeRuleIds } from '../output/lint-privacy.js';
 
 export type LintFinding = RiskFinding & {
   level: LintRuleLevel;
@@ -48,11 +49,13 @@ export type LintCommandResult = {
 
 export class LintCommandError extends Error {
   readonly code: number;
+  readonly category: string;
 
-  constructor(message: string, code: number) {
+  constructor(message: string, code: number, category = 'analysis') {
     super(message);
     this.name = 'LintCommandError';
     this.code = code;
+    this.category = category;
   }
 }
 
@@ -68,33 +71,43 @@ export async function runLintCommand(
   const rules = normalizeRuleSelection(options, resolvedConfig);
   const inputFiles = await collectInputFiles(options.inputPath, options.include, options.exclude);
   if (inputFiles.length === 0) {
-    throw new LintCommandError('No input files found', 1);
+    throw new LintCommandError('No input files found', 1, 'no-files');
   }
 
   const files: LintFileResult[] = [];
   const allFindings: LintFinding[] = [];
   const rulesExecuted = new Set<string>();
+  const inputs: unknown[] = [];
+  for (const filePath of inputFiles) inputs.push(await readInputJson(filePath));
+  const privacy = createLintPrivacy([], inputs, inputFiles);
 
-  for (const filePath of inputFiles) {
-    const parsedInput = await readInputJson(filePath);
-    const flow = parseFlow(parsedInput);
+  for (const [index, filePath] of inputFiles.entries()) {
+    let flow: ReturnType<typeof parseFlow>;
+    try {
+      flow = parseFlow(inputs[index]);
+    } catch {
+      throw new LintCommandError('Invalid Node-RED flow schema', 1, 'schema');
+    }
 
     const result = detectRisks(flow, {
       onlyRules: rules.onlyRules,
       skipRules: rules.skipRules,
       entropyThreshold: resolvedConfig?.entropyThreshold,
+      presentation: privacy.presentation,
     });
 
     for (const ruleId of result.rulesExecuted) {
       rulesExecuted.add(ruleId);
     }
 
-    const findings = applyRuleLevels(result.findings, filePath, resolvedConfig);
+    const findings = applyRuleLevels(result.findings, privacy.path(filePath), resolvedConfig).map(
+      (finding) => markLintFinding(finding),
+    );
     const errorCount = findings.filter((finding) => finding.level === 'error').length;
     const warningCount = findings.filter((finding) => finding.level === 'warn').length;
 
     files.push({
-      filePath,
+      filePath: privacy.path(filePath),
       findings,
       findingCount: findings.length,
       errorCount,
@@ -121,21 +134,35 @@ export function formatLintResult(result: LintCommandResult): string {
   return canonicalStringify(sanitizeLintResult(result), { indent: 2 });
 }
 
-function sanitizeLintResult(result: LintCommandResult): LintCommandResult {
-  return {
-    ...result,
-    findings: result.findings.map((finding) => cloneLintFinding(finding)),
-    files: result.files.map((file) => ({
-      ...file,
-      findings: file.findings.map((finding) => cloneLintFinding(finding)),
-    })),
+function sanitizeLintResult(result: LintCommandResult, inputs: unknown[] = []): LintCommandResult {
+  const privacy = createLintPrivacy(
+    [...result.findings, ...result.files.flatMap((file) => file.findings)],
+    inputs,
+    result.files.map((file) => file.filePath),
+  );
+  const finding = (value: LintFinding): LintFinding => {
+    const safe = privacy.finding(value);
+    return {
+      ...safe,
+      // canonicalStringify treats repeated object references as cycles.
+      affectedNodes: safe.affectedNodes.map((node) => ({ ...node })),
+      level: ['error', 'warn', 'off'].includes(value.level) ? value.level : 'warn',
+      filePath: privacy.path(value.filePath),
+    };
   };
-}
-
-function cloneLintFinding(finding: LintFinding): LintFinding {
   return {
-    ...finding,
-    affectedNodes: finding.affectedNodes.map((node) => ({ ...node })),
+    findingCount: result.findingCount,
+    errorCount: result.errorCount,
+    warningCount: result.warningCount,
+    rulesExecuted: safeRuleIds(result.rulesExecuted),
+    findings: result.findings.map(finding),
+    files: result.files.map((file) => ({
+      filePath: privacy.path(file.filePath),
+      findingCount: file.findingCount,
+      errorCount: file.errorCount,
+      warningCount: file.warningCount,
+      findings: file.findings.map(finding),
+    })),
   };
 }
 
@@ -353,16 +380,14 @@ async function readInputJson(inputPath: string): Promise<unknown> {
   let rawText = '';
   try {
     rawText = await readFile(inputPath, 'utf-8');
-  } catch (error) {
-    const message = error instanceof Error ? error.message : String(error);
-    throw new LintCommandError(`Unable to read input file: ${message}`, 1);
+  } catch {
+    throw new LintCommandError('Unable to read input file', 1, 'read');
   }
 
   try {
     return JSON.parse(rawText) as unknown;
-  } catch (error) {
-    const message = error instanceof Error ? error.message : String(error);
-    throw new LintCommandError(`Invalid JSON in input file: ${message}`, 1);
+  } catch {
+    throw new LintCommandError('Invalid JSON in input file', 1, 'json');
   }
 }
 
@@ -412,7 +437,7 @@ function assertValidRuleIds(ruleIds: Set<string>, ids: string[] | undefined): vo
   if (!ids || ids.length === 0) return;
   const invalid = ids.filter((id) => !ruleIds.has(id));
   if (invalid.length > 0) {
-    throw new LintCommandError(`Unknown rule IDs: ${invalid.join(', ')}`, 1);
+    throw new LintCommandError('Unknown rule IDs', 1, 'rules');
   }
 }
 
@@ -447,7 +472,12 @@ async function collectInputFiles(
   include?: string[],
   exclude?: string[],
 ): Promise<string[]> {
-  const stats = await stat(inputPath);
+  let stats: Awaited<ReturnType<typeof stat>>;
+  try {
+    stats = await stat(inputPath);
+  } catch {
+    throw new LintCommandError('Unable to read input path', 1, 'read');
+  }
   if (stats.isFile()) {
     return [inputPath];
   }
@@ -458,16 +488,26 @@ async function collectInputFiles(
 
   const includeGlobs = include && include.length > 0 ? include : ['**/*.json'];
   const excludeGlobs = exclude ?? [];
-  const includeMatchers = includeGlobs.map(globToRegExp);
-  const excludeMatchers = excludeGlobs.map(globToRegExp);
+  let includeMatchers: RegExp[];
+  let excludeMatchers: RegExp[];
+  try {
+    includeMatchers = includeGlobs.map(globToRegExp);
+    excludeMatchers = excludeGlobs.map(globToRegExp);
+  } catch {
+    throw new LintCommandError('Unable to compile lint include/exclude patterns', 1, 'glob');
+  }
 
   const files: string[] = [];
-  await walkDirectory(inputPath, inputPath, (relativePath, fullPath) => {
-    const normalized = relativePath.replaceAll(path.sep, '/');
-    if (!includeMatchers.some((regex) => regex.test(normalized))) return;
-    if (excludeMatchers.some((regex) => regex.test(normalized))) return;
-    files.push(fullPath);
-  });
+  try {
+    await walkDirectory(inputPath, inputPath, (relativePath, fullPath) => {
+      const normalized = relativePath.replaceAll(path.sep, '/');
+      if (!includeMatchers.some((regex) => regex.test(normalized))) return;
+      if (excludeMatchers.some((regex) => regex.test(normalized))) return;
+      files.push(fullPath);
+    });
+  } catch {
+    throw new LintCommandError('Unable to read input directory', 1, 'read');
+  }
 
   return files.sort((a, b) => a.localeCompare(b));
 }
@@ -503,6 +543,10 @@ function globToRegExp(glob: string): RegExp {
 
 export async function writeLintOutput(content: string, outPath: string): Promise<void> {
   const dir = path.dirname(outPath);
-  await mkdir(dir, { recursive: true });
-  await writeFile(outPath, content, 'utf-8');
+  try {
+    await mkdir(dir, { recursive: true });
+    await writeFile(outPath, content, 'utf-8');
+  } catch {
+    throw new LintCommandError('Unable to write lint report', 1, 'write');
+  }
 }

@@ -124,9 +124,21 @@ function extractAffectedNodes(
   return nodes;
 }
 
-function buildEvidence(flow: ParsedFlow, pathIds: string[] | null, suffix: string): string {
+function buildEvidence(
+  flow: ParsedFlow,
+  pathIds: string[] | null,
+  suffix: string,
+  options?: DetectRiskOptions,
+): string {
   if (!pathIds || pathIds.length === 0) return suffix;
-  const pathLabels = pathIds.map((id) => flow.nodesById.get(id)?.name ?? id);
+  const pathLabels = pathIds.map((id) => {
+    const node = flow.nodesById.get(id);
+    const name = node?.name ?? id;
+    return (
+      options?.presentation?.nodeName(id, name, node?.name === undefined ? undefined : node.type) ??
+      name
+    );
+  });
   return `${pathLabels.join(' -> ')}. ${suffix}`;
 }
 
@@ -153,6 +165,7 @@ function buildExecFindings(
   flow: ParsedFlow,
   inputIds: Set<string>,
   reverseAdj: Map<string, string[]>,
+  options?: DetectRiskOptions,
 ) {
   const findings: RiskFinding[] = [];
   const execNodes = flow.nodes
@@ -167,18 +180,25 @@ function buildExecFindings(
       flow,
       pathIds,
       `Node type "${node.type}" can execute arbitrary commands`,
+      options,
     );
     const affectedNodes = extractAffectedNodes(flow, pathIds, sink);
+    const name =
+      options?.presentation?.nodeName(node.id, node.name, node.type) ?? node.name ?? node.type;
 
     findings.push({
       id: 'RISK_INJECTION_PRONE',
       severity: 'medium',
       confidence: 'low',
-      title: `Command execution node: "${node.name ?? node.type}"`,
-      description: `Node "${node.name ?? node.type}" (${node.type}) executes system commands, which can be dangerous if inputs are not sanitized.`,
+      title: `Command execution node: "${name}"`,
+      description: `Node "${name}" (${node.type}) executes system commands, which can be dangerous if inputs are not sanitized.`,
       remediation:
         'Validate and sanitize all inputs before passing to exec nodes. Consider using allowlists for command parameters.',
-      affectedNodes: affectedNodes.map((n) => ({ id: n.id, name: n.name })),
+      affectedNodes: affectedNodes.map((n) => ({
+        id: options?.presentation?.nodeId(n.id) ?? n.id,
+        name:
+          options?.presentation?.nodeName(n.id, flow.nodesById.get(n.id)?.name, n.type) ?? n.name,
+      })),
       evidence,
     });
   }
@@ -190,6 +210,7 @@ function buildEvalFindings(
   flow: ParsedFlow,
   inputIds: Set<string>,
   reverseAdj: Map<string, string[]>,
+  options?: DetectRiskOptions,
 ): RiskFinding[] {
   const findings: RiskFinding[] = [];
   const evalNodes = flow.nodes
@@ -214,18 +235,24 @@ function buildEvalFindings(
         : 'Function receives external input; review for dynamic code usage';
     }
 
-    const evidence = buildEvidence(flow, pathIds, evidenceSuffix);
+    const evidence = buildEvidence(flow, pathIds, evidenceSuffix, options);
     const affectedNodes = extractAffectedNodes(flow, pathIds, sink);
+    const name =
+      options?.presentation?.nodeName(node.id, node.name, node.type) ?? node.name ?? node.type;
 
     findings.push({
       id: 'RISK_INJECTION_PRONE',
       severity: 'medium',
       confidence: 'low',
-      title: `Dynamic code with external input: "${node.name ?? node.type}"`,
-      description: `Node "${node.name ?? node.type}" (${node.type}) evaluates dynamic content and receives input from an external source.`,
+      title: `Dynamic code with external input: "${name}"`,
+      description: `Node "${name}" (${node.type}) evaluates dynamic content and receives input from an external source.`,
       remediation:
         'Validate and sanitize external inputs before using in function or template nodes. Avoid eval() patterns.',
-      affectedNodes: affectedNodes.map((n) => ({ id: n.id, name: n.name })),
+      affectedNodes: affectedNodes.map((n) => ({
+        id: options?.presentation?.nodeId(n.id) ?? n.id,
+        name:
+          options?.presentation?.nodeName(n.id, flow.nodesById.get(n.id)?.name, n.type) ?? n.name,
+      })),
       evidence,
     });
   }
@@ -238,15 +265,15 @@ export const injectionProneRule: RiskRule = {
   name: 'Injection Vulnerable Pattern',
   description: 'Detects patterns that may be vulnerable to injection attacks.',
 
-  check(flow: ParsedFlow, _options?: DetectRiskOptions): RiskFinding[] {
+  check(flow: ParsedFlow, options?: DetectRiskOptions): RiskFinding[] {
     const inputIds = new Set(
       flow.nodes.filter((node) => INPUT_TYPES.has(node.type)).map((node) => node.id),
     );
     const reverseAdj = buildReverseAdjacency(flow);
 
     const findings = [
-      ...buildExecFindings(flow, inputIds, reverseAdj),
-      ...buildEvalFindings(flow, inputIds, reverseAdj),
+      ...buildExecFindings(flow, inputIds, reverseAdj, options),
+      ...buildEvalFindings(flow, inputIds, reverseAdj, options),
     ];
 
     return findings;

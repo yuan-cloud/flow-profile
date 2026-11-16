@@ -130,12 +130,24 @@ function findCycles(flow: ParsedFlow): string[][] {
   return cycles;
 }
 
-function createCycleFinding(nodes: NodeInfo[], ids: string[]): RiskFinding {
+function createCycleFinding(
+  flow: ParsedFlow,
+  nodes: NodeInfo[],
+  ids: string[],
+  options?: DetectRiskOptions,
+): RiskFinding {
   const isSelfLoop = ids.length === 1;
-  const names = nodes.map((n) => n.name).join(' -> ');
+  const displayed = nodes.map((node) => ({
+    id: options?.presentation?.nodeId(node.id) ?? node.id,
+    name:
+      options?.presentation?.nodeName(node.id, flow.nodesById.get(node.id)?.name, node.type) ??
+      node.name,
+  }));
+  const names = displayed.map((n) => n.name).join(' -> ');
   const cyclePath = ids
     .concat(ids[0] ?? '')
     .filter(Boolean)
+    .map((id) => options?.presentation?.nodeId(id) ?? id)
     .join(' -> ');
 
   return {
@@ -143,13 +155,13 @@ function createCycleFinding(nodes: NodeInfo[], ids: string[]): RiskFinding {
     severity: 'high',
     confidence: 'medium',
     title: isSelfLoop
-      ? `Self-loop detected: "${nodes[0]?.name ?? 'unknown'}"`
+      ? `Self-loop detected: "${displayed[0]?.name ?? 'unknown'}"`
       : 'Circular dependency detected',
     description: isSelfLoop
-      ? `Node "${nodes[0]?.name ?? 'unknown'}" wires directly back to itself without a delay.`
+      ? `Node "${displayed[0]?.name ?? 'unknown'}" wires directly back to itself without a delay.`
       : `A cycle exists in the flow without a delay node. Nodes: ${names}.`,
     remediation: 'Add a delay node in the loop or verify this is intentional.',
-    affectedNodes: nodes,
+    affectedNodes: options?.presentation ? displayed : nodes,
     evidence: `Cycle found: ${cyclePath} (no delay)`,
   };
 }
@@ -159,7 +171,7 @@ export const infiniteLoopRule: RiskRule = {
   name: 'Potential Infinite Loop',
   description: 'Detects nodes that wire back to themselves or create tight cycles.',
 
-  check(flow: ParsedFlow, _options?: DetectRiskOptions): RiskFinding[] {
+  check(flow: ParsedFlow, options?: DetectRiskOptions): RiskFinding[] {
     const cycles = findCycles(flow);
     const findings: RiskFinding[] = [];
 
@@ -175,7 +187,7 @@ export const infiniteLoopRule: RiskRule = {
         nodes.push(info);
       }
       if (missingNode) continue;
-      findings.push(createCycleFinding(nodes, ids));
+      findings.push(createCycleFinding(flow, nodes, ids, options));
     }
 
     return findings;

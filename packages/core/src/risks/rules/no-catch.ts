@@ -23,8 +23,14 @@ function tabHasCatch(flow: ParsedFlow, tabId: string): boolean {
  */
 function findUncaughtOutputs(
   flow: ParsedFlow,
-): Array<{ id: string; name: string; tabId: string; type: string }> {
-  const uncaught: Array<{ id: string; name: string; tabId: string; type: string }> = [];
+): Array<{ id: string; name: string; sourceName?: string; tabId: string; type: string }> {
+  const uncaught: Array<{
+    id: string;
+    name: string;
+    sourceName?: string;
+    tabId: string;
+    type: string;
+  }> = [];
 
   // Group nodes by tab
   const tabsWithoutCatch = new Set<string>();
@@ -43,6 +49,7 @@ function findUncaughtOutputs(
     uncaught.push({
       id: node.id,
       name: node.name ?? node.type,
+      sourceName: node.name,
       tabId: node.z,
       type: node.type,
     });
@@ -56,7 +63,7 @@ export const noCatchRule: RiskRule = {
   name: 'No Catch Node',
   description: 'Detects flows that may throw errors without a catch node to handle them.',
 
-  check(flow: ParsedFlow, _options?: DetectRiskOptions): RiskFinding[] {
+  check(flow: ParsedFlow, options?: DetectRiskOptions): RiskFinding[] {
     const uncaught = findUncaughtOutputs(flow);
 
     if (uncaught.length === 0) {
@@ -64,10 +71,13 @@ export const noCatchRule: RiskRule = {
     }
 
     // Group by tab for reporting
-    const byTab = new Map<string, Array<{ id: string; name: string; type: string }>>();
+    const byTab = new Map<
+      string,
+      Array<{ id: string; name: string; sourceName?: string; type: string }>
+    >();
     for (const node of uncaught) {
       const list = byTab.get(node.tabId) ?? [];
-      list.push({ id: node.id, name: node.name, type: node.type });
+      list.push({ id: node.id, name: node.name, sourceName: node.sourceName, type: node.type });
       byTab.set(node.tabId, list);
     }
 
@@ -75,7 +85,7 @@ export const noCatchRule: RiskRule = {
 
     for (const [tabId, nodes] of byTab) {
       const tab = flow.tabsById.get(tabId);
-      const tabName = tab?.label ?? tabId;
+      const tabName = options?.presentation?.tabName(tabId, tab?.label) ?? tab?.label ?? tabId;
       const outputCount = nodes.length;
       const outputTypes = nodes.map((node) => node.type).join(', ');
 
@@ -87,7 +97,10 @@ export const noCatchRule: RiskRule = {
         description: `Flow "${tabName}" contains ${outputCount} output node(s) but no catch node to handle errors.`,
         remediation:
           'Add a catch node to handle errors. Connect it to a debug node or error handler.',
-        affectedNodes: nodes.map((n) => ({ id: n.id, name: n.name })),
+        affectedNodes: nodes.map((n) => ({
+          id: options?.presentation?.nodeId(n.id) ?? n.id,
+          name: options?.presentation?.nodeName(n.id, n.sourceName, n.type) ?? n.name,
+        })),
         evidence: `Tab "${tabName}" has ${outputCount} output node(s) and no catch node. Output types: ${outputTypes}`,
       });
     }

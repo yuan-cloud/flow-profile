@@ -54,10 +54,77 @@ Options (from `flow-profile build --help`):
 
 Runs static risk detection against one or more flow exports.
 
+Lint detects risks on the original input. Only source-derived display values
+are sanitized while findings are composed; public rule wording is preserved.
+The same presentation is used for text, JSON and SARIF. Detection settings, finding counts and
+fail-on behavior are preserved. Output masks recognized source secret values
+(including repeated aliases), eligible high-entropy tokens and keys in finding
+data. Each whitespace-delimited run is checked for entropy before it is split at
+quotes, backticks or angle brackets, covering recognized symbol-rich and Unicode
+tokens containing those characters. Structured field paths are rendered one
+component at a time: every component is checked, including camelCase keys. Only
+exact public sensitive field names (such as `password`) are exempt. Harmless labels
+and below-threshold path components remain readable where possible. Output privacy always uses
+the default redactor settings, independently of the entropy detection settings.
+
+Known node-type literals used as unnamed-node fallbacks remain public vocabulary, just as
+they do in rule descriptions and output-type lists. Their spelling is independent
+of sensitive values, including when a node ID happens to equal its type. An explicit
+private label matching that type is masked wholly if sanitization would change it,
+so a partial mask cannot be compared against the public type elsewhere.
+
+Node identifiers become stable report-local `node-N` references, and input file
+paths become ordered logical `urn:flow-profile:input:N` references. These are
+report metadata, not filenames or physical SARIF locations. File references follow
+the input collection order (directory entries use locale-based sorting), consistently
+across JSON and SARIF; reports omit the original path mapping. Node references are
+consistent within a report and should be interpreted with the input reference.
+Output-file notices omit the
+requested path. Argument and failure diagnostics omit caller values and raw
+exception details, which can contain input excerpts, keys or filesystem paths.
+They retain fixed categories for argument, configuration, read, JSON, schema, rule,
+directory-pattern, write and internal failures.
+
+This remains heuristic redaction, not certification that an export is safe.
+Unknown low-entropy prose, transformed/encoded secrets and code literals may
+remain, including unrecognized object keys. Recognized short values can also mask
+parts of harmless source labels and keys; surrounding source context can reveal
+or suggest the short value. Public rule text, public type literals, exact public field names and fixed mask/reference
+syntax can coincidentally equal a credential value; their presence does not identify
+that value as a source credential. Review before
+sharing. Direct formatter calls without original-input context cannot discover
+field-name-based secrets or their low-entropy aliases from the flow. This policy
+does not change the privacy behavior of other commands.
+
+Recognition follows the default redactor's string handling. Numeric credentials,
+environment-style `name`/`value` pairs and unrecognized children of credential
+objects can remain. Alias matching is exact: case changes and Unicode normalization
+variants can evade it. Short IDs occurring as ordinary prose are ambiguous; their
+structural identifier slots are aliased, while ordinary words and numbers in labels
+are retained unless recognized as secrets. Entropy alone also misses tokens below
+its threshold, even when they resemble encoded credentials.
+
+Recognized values longer than 1,024 UTF-16 code units are matched as literal
+substrings without allocating a trie state per character. A match masks the whole
+display value. This avoids the reproduced single-long-value memory amplification;
+total memory still depends on input size, the number of shorter recognized values
+and report size. It is not a general resource bound for arbitrary flows.
+
+SARIF includes sanitized remediation guidance in `result.properties.remediation`;
+it does not advertise prose-only guidance as an executable `fix`.
+Default SARIF omits physical `locations` to avoid disclosing or misattributing
+source files. Logical input references live in `result.properties.inputRef`.
+GitHub Code Scanning upload/navigation compatibility is unverified. There is no CI
+source-location opt-in in this version. A future opt-in must validate a source root
+and repository-relative paths, and explain that paths may disclose private names.
+
 ```bash
 flow-profile lint --in ./flows.json
-flow-profile lint --in ./flows --format sarif --output ./lint.sarif
+flow-profile lint --in ./flows.json --format sarif --output ./lint.sarif
 ```
+
+Directory wildcard handling has a known defect; default `**/*.json` may fail before
+analysis. Use explicit file inputs until directory-glob behavior is repaired.
 
 Options:
 
