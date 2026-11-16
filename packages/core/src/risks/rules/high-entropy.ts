@@ -31,6 +31,7 @@ function scanForHighEntropy(
   fieldKey: string | null,
   threshold: number,
   results: HighEntropyHit[],
+  parts: Array<string | number> = [],
 ): void {
   if (typeof obj === 'string') {
     const isSensitive = fieldKey ? isSensitiveField(fieldKey) : false;
@@ -44,6 +45,7 @@ function scanForHighEntropy(
 
     results.push({
       path,
+      parts,
       value: obj,
       entropy,
       isSensitiveField: isSensitive,
@@ -53,20 +55,24 @@ function scanForHighEntropy(
 
   if (Array.isArray(obj)) {
     obj.forEach((item, index) => {
-      scanForHighEntropy(item, appendPath(path, index), fieldKey, threshold, results);
+      scanForHighEntropy(item, appendPath(path, index), fieldKey, threshold, results, [
+        ...parts,
+        index,
+      ]);
     });
     return;
   }
 
   if (typeof obj === 'object' && obj !== null) {
     for (const [key, value] of Object.entries(obj)) {
-      scanForHighEntropy(value, appendPath(path, key), key, threshold, results);
+      scanForHighEntropy(value, appendPath(path, key), key, threshold, results, [...parts, key]);
     }
   }
 }
 
 type HighEntropyHit = {
   path: string;
+  parts: Array<string | number>;
   value: string;
   entropy: number;
   isSensitiveField: boolean;
@@ -98,17 +104,21 @@ function createFinding(
   node: ParsedFlow['nodes'][number],
   result: HighEntropyHit,
   threshold: number,
+  options?: DetectRiskOptions,
 ): RiskFinding {
+  const name =
+    options?.presentation?.nodeName(node.id, node.name, node.type) ?? node.name ?? node.type;
+  const fieldPath = options?.presentation?.fieldPath(result.parts) ?? result.path;
   return {
     id: 'RISK_HIGH_ENTROPY',
     severity: severityFor(result, threshold),
     confidence: confidenceFor(result, threshold),
-    title: `Potential secret in "${node.name ?? node.type}"`,
-    description: `High-entropy string found in field "${result.path}" that may be a hardcoded secret.`,
+    title: `Potential secret in "${name}"`,
+    description: `High-entropy string found in field "${fieldPath}" that may be a hardcoded secret.`,
     remediation:
       'Move secrets to environment variables or a secure credential store. Never hardcode secrets in flows.',
-    affectedNodes: [{ id: node.id, name: node.name ?? node.type }],
-    evidence: `Entropy: ${result.entropy.toFixed(2)} (threshold ${threshold}), Field: ${result.path}, Length: ${result.value.length} chars`,
+    affectedNodes: [{ id: options?.presentation?.nodeId(node.id) ?? node.id, name }],
+    evidence: `Entropy: ${result.entropy.toFixed(2)} (threshold ${threshold}), Field: ${fieldPath}, Length: ${result.value.length} chars`,
   };
 }
 
@@ -127,7 +137,7 @@ export const highEntropyRule: RiskRule = {
 
       for (const result of results) {
         if (isDuplicateValue(seenValues, result.value)) continue;
-        findings.push(createFinding(node, result, threshold));
+        findings.push(createFinding(node, result, threshold, options));
       }
     }
 

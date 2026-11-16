@@ -84,12 +84,22 @@ export interface RiskRule {
  * Options for risk detection
  */
 export interface DetectRiskOptions {
+  /** Optional presentation of interpolated data; never changes the graph being analyzed. */
+  presentation?: RiskPresentation;
   /** Only run specific rules (by ID) */
   onlyRules?: string[];
   /** Skip specific rules (by ID) */
   skipRules?: string[];
   /** Override entropy threshold for rules that use it */
   entropyThreshold?: number;
+}
+
+export interface RiskPresentation {
+  nodeId(id: string): string;
+  /** Keep public type vocabulary separate from private labels and id fallbacks. */
+  nodeName(id: string, name: string | undefined, type?: string): string;
+  tabName(id: string, label: string | undefined): string;
+  fieldPath(parts: Array<string | number>): string;
 }
 
 /**

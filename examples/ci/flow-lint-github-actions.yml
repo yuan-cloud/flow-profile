@@ -1,3 +1,5 @@
+# Illustrative, not executed on GitHub. See docs/ci/github-actions.md for privacy
+# and entry-path limitations. Default SARIF has no physical source locations.
 name: Flow Profile Lint
 
 on:
@@ -11,16 +13,27 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: oven-sh/setup-bun@v1
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: '1.3.14'
 
-      - name: Install Flow Profile CLI
-        run: bun install -g @flow-profile/cli
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+
+      - name: Build local CLI
+        run: |
+          bun install --frozen-lockfile --ignore-scripts
+          node node_modules/typescript/bin/tsc -p packages/core/tsconfig.json
+          node node_modules/typescript/bin/tsc -p packages/cli/tsconfig.json
 
       - name: Lint flows (SARIF)
-        run: flow-profile lint ./flows --format sarif --output results.sarif
+        run: node packages/cli/dist/cli.js lint --in flows/flows.json --format sarif --output results.sarif --fail-on error
 
-      - name: Upload SARIF
-        uses: github/codeql-action/upload-sarif@v3
+      - name: Save report artifact
+        uses: actions/upload-artifact@v4
         if: always()
         with:
-          sarif_file: results.sarif
+          name: flow-lint-report
+          path: results.sarif
+          if-no-files-found: error

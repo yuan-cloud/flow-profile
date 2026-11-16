@@ -17,14 +17,16 @@ import type { DetectRiskOptions, RiskDetectionResult, RiskFinding, RiskRule } fr
 /**
  * Compare findings for deterministic sorting
  */
-function compareFinding(a: RiskFinding, b: RiskFinding): number {
+function compareFinding(a: RiskFinding, b: RiskFinding, originalIds?: Map<string, string>): number {
   // Sort by rule ID first
   const idCompare = a.id.localeCompare(b.id);
   if (idCompare !== 0) return idCompare;
 
   // Then by first affected node ID
-  const aFirstNode = a.affectedNodes[0]?.id ?? '';
-  const bFirstNode = b.affectedNodes[0]?.id ?? '';
+  const aId = a.affectedNodes[0]?.id ?? '';
+  const bId = b.affectedNodes[0]?.id ?? '';
+  const aFirstNode = originalIds?.get(aId) ?? aId;
+  const bFirstNode = originalIds?.get(bId) ?? bId;
   return aFirstNode.localeCompare(bFirstNode);
 }
 
@@ -90,16 +92,32 @@ export function detectRisks(
   const rules = filterRules(ruleRegistry, options);
   const findings: RiskFinding[] = [];
   const rulesExecuted: string[] = [];
+  // Presentation aliases must not change the original detector's ordering.
+  const originalIds = new Map<string, string>();
+  const presentation = options.presentation;
+  const checkOptions = presentation
+    ? {
+        ...options,
+        presentation: {
+          ...presentation,
+          nodeId(id: string) {
+            const alias = presentation.nodeId(id);
+            originalIds.set(alias, id);
+            return alias;
+          },
+        },
+      }
+    : options;
 
   // Execute each rule
   for (const rule of rules) {
-    const ruleFindings = rule.check(flow, options);
+    const ruleFindings = rule.check(flow, checkOptions);
     findings.push(...ruleFindings);
     rulesExecuted.push(rule.id);
   }
 
   // Sort findings for determinism
-  findings.sort(compareFinding);
+  findings.sort((a, b) => compareFinding(a, b, originalIds));
 
   return {
     findings,

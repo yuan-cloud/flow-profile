@@ -1,4 +1,5 @@
 import { canonicalStringify, getRules, type RiskFinding, VERSION } from '@flow-profile/core';
+import { createLintPrivacy, safeRuleIds } from './lint-privacy.js';
 
 type SarifLog = {
   $schema: string;
@@ -31,23 +32,24 @@ type SarifResult = {
   ruleId: string;
   level: SarifLevel;
   message: { text: string };
-  locations: Array<{
+  locations?: Array<{
     physicalLocation: {
       artifactLocation: { uri: string };
       region: { startLine: number };
     };
   }>;
-  fixes?: Array<{ description: { text: string } }>;
   properties?: {
     confidence?: string;
     affectedNodes?: Array<{ id: string; name: string }>;
+    remediation?: string;
+    inputRef?: string;
   };
 };
 
 type SarifLevel = 'error' | 'warning' | 'note';
 
 const SARIF_SCHEMA =
-  'https://raw.githubusercontent.com/oasis-tcs/sarif-spec/master/Schemata/sarif-schema-2.1.0.json';
+  'https://docs.oasis-open.org/sarif/sarif/v2.1.0/errata01/os/schemas/sarif-schema-2.1.0.json';
 
 const SEVERITY_TO_LEVEL: Record<RiskFinding['severity'], SarifLevel> = {
   high: 'error',
@@ -65,7 +67,14 @@ type SarifOptions = {
 };
 
 export function formatSarifLog(result: SarifInput, options: SarifOptions): string {
-  const log = buildSarifLog(result, options);
+  const privacy = createLintPrivacy(result.findings, [], [options.inputPath]);
+  const log = buildSarifLog(
+    {
+      findings: result.findings.map((finding) => privacy.finding(finding)),
+      rulesExecuted: safeRuleIds(result.rulesExecuted),
+    },
+    { inputPath: privacy.path(options.inputPath) },
+  );
   return canonicalStringify(log, { indent: 2 });
 }
 
@@ -139,24 +148,12 @@ function toSarifResult(
         ? `${finding.title}. ${finding.description} Affected nodes: ${affected}`
         : `${finding.title}. ${finding.description}`,
     },
-    locations: [
-      {
-        physicalLocation: {
-          artifactLocation: { uri: normalizeUri(pathHint) },
-          region: { startLine: 1 },
-        },
-      },
-    ],
-    fixes: finding.remediation
-      ? [
-          {
-            description: { text: finding.remediation },
-          },
-        ]
-      : undefined,
     properties: {
+      inputRef: pathHint,
       confidence: finding.confidence,
       affectedNodes: finding.affectedNodes,
+      // Prose guidance is not an executable SARIF fix (which requires artifactChanges).
+      remediation: finding.remediation,
     },
   };
 }
@@ -164,8 +161,4 @@ function toSarifResult(
 function formatAffectedNodes(finding: RiskFinding): string | null {
   if (!finding.affectedNodes.length) return null;
   return finding.affectedNodes.map((node) => `${node.name} (${node.id})`).join(', ');
-}
-
-function normalizeUri(value: string): string {
-  return value.replaceAll('\\', '/');
 }

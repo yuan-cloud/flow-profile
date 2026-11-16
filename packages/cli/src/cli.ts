@@ -86,17 +86,33 @@ async function handleLint(args: string[], io: IoStreams): Promise<number> {
     return handleLintParseFailure(parsed.error, io);
   }
 
+  let phase = 'config';
   try {
     const config = await loadLintConfig(parsed.options.configPath);
+    phase = 'analysis';
     const result = await runLintCommand(parsed.options, config);
     const format = parsed.options.format ?? 'text';
     const failOn = resolveLintFailOn(parsed.options, config);
     await writeLintReport(format, result, parsed.options, io);
     return computeLintExitCode(result, failOn);
   } catch (error) {
-    const message = error instanceof Error ? error.message : String(error);
     const code = error instanceof LintCommandError ? error.code : 1;
-    io.stderr.write(`Lint failed: ${message}\n`);
+    // Exception messages can contain JSON excerpts, object keys, paths and credentials.
+    const categories = {
+      config: 'Invalid or unreadable lint configuration.',
+      read: 'Unable to read lint input.',
+      json: 'Invalid JSON in lint input.',
+      schema: 'Invalid Node-RED flow schema.',
+      rules: 'Unknown lint rule IDs.',
+      'no-files': 'No input files found.',
+      glob: 'Unable to compile lint include/exclude patterns (directory glob support is limited).',
+      write: 'Unable to write lint report.',
+      analysis: 'Internal lint analysis or rendering error.',
+    };
+    const category = error instanceof LintCommandError ? error.category : phase;
+    io.stderr.write(
+      `Lint failed: ${Object.hasOwn(categories, category) ? categories[category as keyof typeof categories] : categories.analysis} Values and paths omitted for privacy.\n`,
+    );
     return code;
   }
 }
@@ -106,7 +122,17 @@ function handleLintParseFailure(error: string, io: IoStreams): number {
     io.stdout.write(`${lintHelpText()}\n`);
     return 0;
   }
-  io.stderr.write(`Error: ${error}\n`);
+  const hints: Array<[string, string]> = [
+    ['Missing input path', 'Missing input path; use --in <path>.'],
+    ['Input path already provided', 'Input path already provided; use --in once.'],
+    ['Missing value for', 'Missing value for a lint option.'],
+    ['Invalid format', 'Invalid format; use text, json or sarif.'],
+    ['Invalid fail-on', 'Invalid fail-on level; use error, warn or off.'],
+    ['Unknown option', 'Unknown lint option.'],
+    ['Unexpected argument', 'Unexpected lint argument.'],
+  ];
+  const hint = hints.find(([prefix]) => error.startsWith(prefix))?.[1] ?? 'Invalid lint arguments.';
+  io.stderr.write(`Error: ${hint} Values omitted for privacy.\n`);
   io.stderr.write('Run "flow-profile lint --help" for usage.\n');
   return 1;
 }
@@ -148,7 +174,7 @@ async function writeLintContent(
   if (outputPath) {
     await writeLintOutput(content, outputPath);
     if (!quiet) {
-      io.stdout.write(`${label} written to ${outputPath}\n`);
+      io.stdout.write(`${label} written to the requested output file.\n`);
     }
     return;
   }
@@ -196,6 +222,11 @@ function buildTextLintReport(result: Awaited<ReturnType<typeof runLintCommand>>)
     for (const finding of file.findings) {
       lines.push(`  - [${finding.level}] ${finding.title}`);
       lines.push(`    ${finding.description}`);
+      if (finding.affectedNodes.length) {
+        lines.push(
+          `    Affected nodes: ${finding.affectedNodes.map((node) => `${node.name} (${node.id})`).join(', ')}`,
+        );
+      }
     }
   }
 

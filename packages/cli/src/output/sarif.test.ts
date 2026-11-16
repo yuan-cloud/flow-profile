@@ -15,7 +15,7 @@ describe('SARIF output', () => {
       $schema: string;
       runs: Array<{
         tool: { driver: { rules: Array<{ id: string }> } };
-        results: Array<{ ruleId: string; fixes?: Array<{ description: { text: string } }> }>;
+        results: Array<{ ruleId: string; properties?: { remediation?: string }; fixes?: unknown }>;
       }>;
     };
 
@@ -23,6 +23,7 @@ describe('SARIF output', () => {
     expect(sarif.$schema).toContain('sarif-schema-2.1.0.json');
     expect(sarif.runs[0].tool.driver.rules.length).toBeGreaterThan(0);
     expect(sarif.runs[0].results.length).toBe(result.findings.length);
-    expect(sarif.runs[0].results.some((entry) => entry.fixes?.[0]?.description.text)).toBe(true);
+    expect(sarif.runs[0].results.some((entry) => entry.properties?.remediation)).toBe(true);
+    expect(sarif.runs[0].results.every((entry) => entry.fixes === undefined)).toBe(true);
   });
 });
