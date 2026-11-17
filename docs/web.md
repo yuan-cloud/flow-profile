@@ -36,6 +36,16 @@ Typical flow:
 
 ## Privacy and current limitations
 
+The uploader retains its 5 MiB file limit. Uploader and worker JSON parsing also
+use the shared core preflight: at most 32 MiB of UTF-8 JSON, 50,000 elements in
+each decoded array, 64 container levels and 2,000,000 structural units (opening
+brackets/braces, commas and colons outside strings). Depth/work checks run before
+`JSON.parse`; decoded input is checked before redaction. Direct worker/core object
+inputs are checked as well, including custom metadata. A resource refusal stops
+processing and displays a fixed resource-limit message. These limits do not make
+the output confidential or impose a hard memory ceiling on all later processing.
+The patched Zod dependency and these input limits address different layers.
+
 - Web and CLI `build` use the same core redactor and defaults. They do **not** currently produce equivalent artifacts: the web summary is count-based, its capability manifest has empty tool/resource lists, and its prompt adds selected/excluded node and collapsed-subflow labels. Function-code inclusion is not implemented in web output. The web token budget is an estimate/warning, not a hard output limit.
 - Redaction is heuristic, not a guarantee. It masks string values in matching fields and eligible strings above the entropy threshold. It does not rename object keys. Entropy scanning skips strings containing whitespace, short strings, UUIDs, dates, versions and some short base64-like strings. A low-entropy value masked in a password field can remain when repeated in a name or label. Ordinary prose or sensitive labels that do not match these rules can remain; inspect before sharing.
 - Entropy scanning preserves structural fields on flow elements: IDs, type discriminators (including `subflow:<id>`), parent references, wire targets and subflow input/output wire references. Identical values in labels or nested content still undergo redaction. Explicit field-name/custom patterns take precedence. Do not use structural identifiers to store secrets.

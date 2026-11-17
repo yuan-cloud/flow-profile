@@ -1,6 +1,6 @@
 import { existsSync } from 'node:fs';
-import { readFile } from 'node:fs/promises';
 import path from 'node:path';
+import { readInputJsonFile } from '../input.js';
 
 export type LintRuleLevel = 'error' | 'warn' | 'off';
 
@@ -17,10 +17,9 @@ export async function loadLintConfig(configPath?: string): Promise<LintConfig | 
   const resolved = configPath ? path.resolve(configPath) : findDefaultConfig();
   if (!resolved) return undefined;
 
-  const raw = await readFile(resolved, 'utf-8');
   let parsed: unknown;
   try {
-    parsed = JSON.parse(raw) as unknown;
+    parsed = await readInputJsonFile(resolved);
   } catch (error) {
     throw new Error(`Invalid lint config JSON at ${resolved}: ${String(error)}`);
   }

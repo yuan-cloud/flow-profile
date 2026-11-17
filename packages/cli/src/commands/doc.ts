@@ -1,14 +1,16 @@
-import { mkdir, readFile, writeFile } from 'node:fs/promises';
+import { mkdir, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 
 import {
   compareFlows,
   generateFlowDiffMarkdown,
   generateRunbookMarkdown,
+  InputLimitError,
   parseFlow,
   redactSecrets,
   VERSION,
 } from '@flow-profile/core';
+import { createInputBudget, type InputReadBudget, readInputJsonFile } from '../input.js';
 
 export type DocCommandOptions = {
   inputPath: string;
@@ -44,7 +46,8 @@ export async function runDocCommand(options: DocCommandOptions): Promise<string>
     throw new DocCommandError('Missing output path', 1);
   }
 
-  const parsedInput = await readInputJson(options.inputPath);
+  const inputBudget = createInputBudget();
+  const parsedInput = await readInputJson(options.inputPath, inputBudget);
   const redactionOptions = {
     enabled: true,
     strictMode: true,
@@ -54,7 +57,7 @@ export async function runDocCommand(options: DocCommandOptions): Promise<string>
   const flow = parseFlow(redactionResult.redacted);
 
   if (options.diffPath) {
-    const parsedDiffInput = await readInputJson(options.diffPath);
+    const parsedDiffInput = await readInputJson(options.diffPath, inputBudget);
     const diffRedactionResult = redactSecrets(parsedDiffInput, redactionOptions);
     const diffFlow = parseFlow(diffRedactionResult.redacted);
     const diff = compareFlows(flow, diffFlow);
@@ -251,20 +254,16 @@ const handleToken = (token: string, next: string | undefined, state: ParseState)
   return { advance: 1, error: `Unexpected argument: ${token}` };
 };
 
-async function readInputJson(inputPath: string): Promise<unknown> {
-  let rawText = '';
+async function readInputJson(inputPath: string, budget: InputReadBudget): Promise<unknown> {
   try {
-    rawText = await readFile(inputPath, 'utf-8');
+    return await readInputJsonFile(inputPath, budget);
   } catch (error) {
+    if (error instanceof InputLimitError) throw new DocCommandError(error.message, 1);
     const message = error instanceof Error ? error.message : String(error);
+    if (error instanceof SyntaxError) {
+      throw new DocCommandError(`Invalid JSON in input file: ${message}`, 1);
+    }
     throw new DocCommandError(`Unable to read input file: ${message}`, 1);
-  }
-
-  try {
-    return JSON.parse(rawText) as unknown;
-  } catch (error) {
-    const message = error instanceof Error ? error.message : String(error);
-    throw new DocCommandError(`Invalid JSON in input file: ${message}`, 1);
   }
 }
 

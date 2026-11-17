@@ -1,8 +1,10 @@
+import { parseInputJson } from '@flow-profile/core';
+
 export type JsonParseResult = { ok: true; value: unknown } | { ok: false; error: Error };
 
 export const parseJsonSafe = (raw: string): JsonParseResult => {
   try {
-    return { ok: true, value: JSON.parse(raw) as unknown };
+    return { ok: true, value: parseInputJson(raw) };
   } catch (error) {
     return {
       ok: false,

@@ -1,4 +1,5 @@
 import {
+  assertInputLimits,
   categorizeFlow,
   detectRisksSimple,
   expandSubflows,
@@ -134,6 +135,7 @@ export const buildResultFromInput = (
   options: Partial<BuildOptions> = {},
   onProgress: (phase: string, percent: number) => void = () => {},
 ): BuildResult => {
+  assertInputLimits(input);
   const parameters = { ...DEFAULT_BUILD_OPTIONS, ...options };
   onProgress('Redacting sensitive values...', 20);
   const { redacted, report } = redactSecrets(input, {
