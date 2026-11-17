@@ -17,6 +17,45 @@ bun run --cwd packages/cli build
 node packages/cli/dist/cli.js build --in ./flows.json --out-dir ./out
 ```
 
+## Input resource limits
+
+Flow input files must be regular files (a symlink to a regular file is accepted).
+The CLI reads at most 32 MiB plus one refusal-detection byte, counts actual bytes
+rather than trusting file-size metadata, and closes the input on failure. `lint`
+shares 32 MiB across its input files and accepts at most 128 files; `doc --diff`
+shares that budget across both inputs. A lint configuration has its own 32 MiB cap.
+
+The shared core preflight allows at most 50,000 elements in any array, 64 nested
+containers, and 2,000,000 structural units across an input, including custom
+metadata. Structural units count opening brackets/braces, commas and colons
+outside strings. Byte, depth and structural checks run before `JSON.parse`;
+the structural-unit budget is shared across lint inputs and across a doc diff's
+two inputs, while a configuration has its own budget. Splitting an input does not
+raise these aggregate limits.
+Decoded-array and aggregate-text checks run before validation or redaction.
+Already parsed core inputs have the same container/work limits and an aggregate
+33,554,432 UTF-16 code-unit text budget, including keys. Accessors are rejected without
+evaluating their values; cyclic data eventually reaches the depth/work limit.
+These APIs expect JSON-shaped data, not arbitrary JavaScript objects or proxies.
+
+The runtime dependency is pinned to patched Zod 4.6.6. Bounded schema arrays use
+its early size check and stop validation at the first invalid element, retaining
+at most 16 issues per array failure. Invalid-input diagnostics therefore no longer
+enumerate every failing element. Valid data, custom fields and flow relationships
+remain supported within the limits. Capacity depends on fields and topology:
+verified CLI fixtures include 40,000 default-shaped function nodes in 1,000 tabs
+(1,291,000 structural units). Richer metadata and different graph shapes can hit
+input or downstream analysis limits. The web uploader retains its separate 5 MiB cap.
+
+CLI resource refusals return exit 1; lint uses the fixed `input-limit` diagnostic
+category without input excerpts or paths. A resource refusal is not a successful
+lint result and is independent of `--fail-on`.
+
+Input bounds are defense in depth, not a substitute for the patched dependency
+or a general process-memory ceiling. Redaction, expansion, risk presentation and
+report generation can still amplify accepted inputs; many shorter recognized
+values remain a documented matcher-memory limit. Review exports before sharing.
+
 ## build
 
 Builds a deterministic support bundle plus supporting artifacts.

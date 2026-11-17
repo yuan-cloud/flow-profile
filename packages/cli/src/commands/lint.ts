@@ -1,15 +1,17 @@
-import { mkdir, readdir, readFile, stat, writeFile } from 'node:fs/promises';
+import { mkdir, readdir, stat, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 
 import {
   canonicalStringify,
   detectRisks,
   getRules,
+  InputLimitError,
   parseFlow,
   type RiskFinding,
 } from '@flow-profile/core';
 
 import { type LintConfig, type LintRuleLevel, loadLintConfig } from '../config/load.js';
+import { createInputBudget, type InputReadBudget, readInputJsonFile } from '../input.js';
 import { createLintPrivacy, markLintFinding, safeRuleIds } from '../output/lint-privacy.js';
 
 export type LintFinding = RiskFinding & {
@@ -78,7 +80,11 @@ export async function runLintCommand(
   const allFindings: LintFinding[] = [];
   const rulesExecuted = new Set<string>();
   const inputs: unknown[] = [];
-  for (const filePath of inputFiles) inputs.push(await readInputJson(filePath));
+  const inputBudget = createInputBudget();
+  if (inputFiles.length > inputBudget.filesRemaining) {
+    throw new LintCommandError(new InputLimitError('files').message, 1, 'input-limit');
+  }
+  for (const filePath of inputFiles) inputs.push(await readInputJson(filePath, inputBudget));
   const privacy = createLintPrivacy([], inputs, inputFiles);
 
   for (const [index, filePath] of inputFiles.entries()) {
@@ -376,18 +382,17 @@ function splitList(value: string): string[] {
     .filter((entry) => entry.length > 0);
 }
 
-async function readInputJson(inputPath: string): Promise<unknown> {
-  let rawText = '';
+async function readInputJson(inputPath: string, budget: InputReadBudget): Promise<unknown> {
   try {
-    rawText = await readFile(inputPath, 'utf-8');
-  } catch {
+    return await readInputJsonFile(inputPath, budget);
+  } catch (error) {
+    if (error instanceof InputLimitError) {
+      throw new LintCommandError(error.message, 1, 'input-limit');
+    }
+    if (error instanceof SyntaxError) {
+      throw new LintCommandError('Invalid JSON in input file', 1, 'json');
+    }
     throw new LintCommandError('Unable to read input file', 1, 'read');
-  }
-
-  try {
-    return JSON.parse(rawText) as unknown;
-  } catch {
-    throw new LintCommandError('Invalid JSON in input file', 1, 'json');
   }
 }
 

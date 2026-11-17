@@ -103,6 +103,7 @@ async function handleLint(args: string[], io: IoStreams): Promise<number> {
       read: 'Unable to read lint input.',
       json: 'Invalid JSON in lint input.',
       schema: 'Invalid Node-RED flow schema.',
+      'input-limit': 'Input resource limit exceeded.',
       rules: 'Unknown lint rule IDs.',
       'no-files': 'No input files found.',
       glob: 'Unable to compile lint include/exclude patterns (directory glob support is limited).',

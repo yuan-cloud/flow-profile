@@ -80,6 +80,7 @@
 </template>
 
 <script setup lang="ts">
+import { InputLimitError } from '@flow-profile/core';
 // biome-ignore lint/correctness/noUnusedImports: used in template.
 import { Upload } from 'lucide-vue-next';
 import { computed, ref } from 'vue';
@@ -210,7 +211,11 @@ const handleFile = async (file: File) => {
 
   const parsedResult = parseJsonSafe(rawText);
   if (!parsedResult.ok) {
-    setError("This doesn't look like JSON. Please check the file format.");
+    setError(
+      parsedResult.error instanceof InputLimitError
+        ? parsedResult.error.message
+        : "This doesn't look like JSON. Please check the file format.",
+    );
     return;
   }
   const parsed = parsedResult.value;

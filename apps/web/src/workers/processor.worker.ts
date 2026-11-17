@@ -1,5 +1,6 @@
 /// <reference lib="webworker" />
 
+import { InputLimitError } from '@flow-profile/core';
 import type { BuildOptions, RebuildOptions, WorkerRequest, WorkerResponse } from '@/types/worker';
 import { parseJsonSafe } from '@/utils/errorHandling';
 import { buildResultFromInput } from './buildResult';
@@ -31,7 +32,11 @@ const handleParse = (rawJson: string, options: Partial<BuildOptions> = {}): void
 
   const parsedResult = parseJsonSafe(rawJson);
   if (!parsedResult.ok) {
-    postError('Invalid JSON input');
+    postError(
+      parsedResult.error instanceof InputLimitError
+        ? parsedResult.error.message
+        : 'Invalid JSON input',
+    );
     return;
   }
   const parsedInput = parsedResult.value;
@@ -44,9 +49,13 @@ const handleParse = (rawJson: string, options: Partial<BuildOptions> = {}): void
     postProgress('Done', 100);
     const message: WorkerResponse = { type: 'result', payload: result };
     ctx.postMessage(message);
-  } catch {
+  } catch (error) {
     // Parser exceptions can contain input values; do not echo them to the UI.
-    postError('Unable to process flow. Check the Node-RED export format.');
+    postError(
+      error instanceof InputLimitError
+        ? error.message
+        : 'Unable to process flow. Check the Node-RED export format.',
+    );
   }
 };
 

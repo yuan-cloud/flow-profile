@@ -1,4 +1,4 @@
-import { mkdir, readFile, writeFile } from 'node:fs/promises';
+import { mkdir, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 
 import {
@@ -6,12 +6,14 @@ import {
   buildSupportBundle,
   canonicalStringify,
   expandSubflows,
+  InputLimitError,
   parseFlow,
   redactSecrets,
   stringifyAboutMyFlows,
   stringifyCapabilityManifest,
   stringifyRiskFindings,
 } from '@flow-profile/core';
+import { readInputJsonFile } from '../input.js';
 
 export type BuildCommandOptions = {
   inputPath: string;
@@ -64,19 +66,15 @@ function isZodError(error: unknown): boolean {
 }
 
 async function readInputJson(inputPath: string): Promise<unknown> {
-  let rawText = '';
   try {
-    rawText = await readFile(inputPath, 'utf-8');
+    return await readInputJsonFile(inputPath);
   } catch (error) {
+    if (error instanceof InputLimitError) throw new BuildCommandError(error.message, 1);
     const message = error instanceof Error ? error.message : String(error);
+    if (error instanceof SyntaxError) {
+      throw new BuildCommandError(`Invalid JSON in input file: ${message}`, 1);
+    }
     throw new BuildCommandError(`Unable to read input file: ${message}`, 1);
-  }
-
-  try {
-    return JSON.parse(rawText) as unknown;
-  } catch (error) {
-    const message = error instanceof Error ? error.message : String(error);
-    throw new BuildCommandError(`Invalid JSON in input file: ${message}`, 1);
   }
 }
 
